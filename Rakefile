@@ -59,8 +59,8 @@ def check_curl_support
         raise "could not find CURL_INCLUDE_DIR"
     end
 
-    if (ENV['CURL_LIB_DIR'].to_s.empty?)
-        raise "could not find CURL_LIB_DIR"
+    if (ENV['CURL_LIBRARY'].to_s.empty?)
+        raise "could not find CURL_LIBRARY"
     end
 
 end

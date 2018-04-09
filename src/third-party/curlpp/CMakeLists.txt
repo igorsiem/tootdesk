@@ -14,27 +14,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is the top-level cmake file
+# This cmake file specifies how to build the curlpp executable
 
-cmake_minimum_required(VERSION 3.10)
-project(tootdesk LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
-
-SET(CURL_LIB "curl")
-if (WIN32)
-    set(CURL_LIB "$ENV{CURL_LIBRARY}")
-    set(CURLPP_LIB "$ENV{CURLPP_LIBRARY}")
-endif()
-
-include_directories(
-    .
-    third-party
-    third-party/jsoncpp
-    third-party/curlpp/include
-    $ENV{CURL_INCLUDE_DIR}      # only needed for Windows
-)
-
-add_subdirectory(test)
-add_subdirectory(third-party)
+file(GLOB_RECURSE CURLPP_SRC *.cpp)
+add_library(curlpp ${CURLPP_SRC})
