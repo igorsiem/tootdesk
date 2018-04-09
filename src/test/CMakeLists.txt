@@ -20,3 +20,7 @@ file (GLOB_RECURSE TEST_SRC *.cpp)
 add_executable(test-tootdesk ${TEST_SRC})
 
 # TODO add target link libraries
+
+target_link_libraries(test-tootdesk
+    ${CURL_LIB}
+)

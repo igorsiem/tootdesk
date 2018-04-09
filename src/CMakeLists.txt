@@ -20,6 +20,17 @@ cmake_minimum_required(VERSION 3.10)
 project(tootdesk LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
 
-include_directories(. third-party)
+SET(CURL_LIB "curl")
+if (WIN32)
+    set(CURL_LIB "$ENV{CURL_LIB_DIR}/libcurl_a.lib")
+endif()
+
+include_directories(
+    .
+    third-party
+    $ENV{CURL_INCLUDE_DIR}  # only needed for Windows
+)
+
 add_subdirectory(test)

@@ -1,6 +1,15 @@
 # TootDesk
 Desktop client for Mastodon
 
+# Build Notes
+
+Dependencies:
+
+*   [cURL](https://curl.haxx.se/) - this should be available on most Linux
+    systems already; for Windows, you probably need to build it from
+    source and set environment variables `CURL_INCLUDE_DIR` and
+    `CURL_LIB_DIR`
+
 # License
 *TootDesk* - Desktop Mastodon Client
 Copyright (C) 2018 Igor Siemienowicz
@@ -16,4 +25,4 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
 more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.
+this program.  If not, see http://www.gnu.org/licenses/.

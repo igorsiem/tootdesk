@@ -22,10 +22,13 @@ require 'concurrent'
 # --- Config --
 
 if Rake::Win32::windows?
+
     $vsyear = 2017
     puts "environment: Windows"
     puts "build using Visual Studio #{$vsyear}"
+
 else
+
     puts "environment: Posix-compliant"
     puts "build using GCC"
 
@@ -37,6 +40,7 @@ $wordsize = 64 if ['foo'].pack("p").size == 8
 
 puts "word size: #{$wordsize}"
 puts "processors: #{Concurrent.processor_count}"
+
 puts "---"
 
 # --- Build / Clean ---
@@ -47,6 +51,19 @@ desc "clean all build artefacts"
 task :clean do
     FileUtils.rm_rf "build"
 end # clean task
+
+# Check that curl is installed with environment variables (only for Windows)
+def check_curl_support
+
+    if (ENV['CURL_INCLUDE_DIR'].to_s.empty?)
+        raise "could not find CURL_INCLUDE_DIR"
+    end
+
+    if (ENV['CURL_LIB_DIR'].to_s.empty?)
+        raise "could not find CURL_LIB_DIR"
+    end
+
+end
 
 # Assemble all the (rather complicated) options for running msbuild
 #
@@ -73,6 +90,9 @@ def assemble_msbuild_commands
     raise "could not find environment variable 'VCINSTALLDIR' - " +
         "have you run 'vcvars.bat'?" \
         if ENV['VCINSTALLDIR'].to_s.empty?
+
+    # Check curl installation
+    check_curl_support
 
     platform = "Win32"
     cmake_config = "-G \"Visual Studio #{vernum} #{$vsyear} Win32\""
