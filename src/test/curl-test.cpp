@@ -23,7 +23,6 @@
  * \copyright GPL 3.0
  */
 
-#include <iostream>
 #include <catch/catch.hpp>
 #include <curl/curl.h>
 
