@@ -16,3 +16,4 @@
 
 add_subdirectory(jsoncpp)
 add_subdirectory(curlpp)
+add_subdirectory(mastodon-cpp)

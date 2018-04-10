@@ -22,6 +22,9 @@ project(tootdesk LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
 
+# Find cURL manually for windows
+#
+# TODO Figure out why FindCURL doesn't work
 SET(CURL_LIB "curl")
 if (WIN32)
     set(CURL_LIB "$ENV{CURL_LIBRARY}")
@@ -33,6 +36,7 @@ include_directories(
     third-party
     third-party/jsoncpp
     third-party/curlpp/include
+    third-party/mastodon-cpp
     $ENV{CURL_INCLUDE_DIR}      # only needed for Windows
 )
 

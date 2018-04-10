@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This cmake file specifies how to build the curlpp librayr
+# This cmake file specifies how to build the mastodon-cpp library
 
-file(GLOB_RECURSE CURLPP_SRC *.cpp)
-add_library(curlpp ${CURLPP_SRC})
+file(GLOB_RECURSE MASTODON_CPP_SRC *.cpp)
+add_library(mastodon-cpp ${MASTODON_CPP_SRC})

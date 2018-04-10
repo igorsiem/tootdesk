@@ -1,0 +1,12 @@
+#ifndef VERSION_HPP
+#define VERSION_HPP
+
+namespace Mastodon
+{
+    namespace global
+    {
+        static constexpr char version[] = "0.8.7";
+    }
+}
+
+#endif // VERSION_HPP
