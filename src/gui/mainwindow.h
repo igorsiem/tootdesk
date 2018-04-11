@@ -27,36 +27,73 @@
 #define _td_gui_mainwindow_h
 
 #include <QMainWindow>
+#include <QScrollArea>
 
 namespace Ui {
 class MainWindow;
 }
 
 /**
- * @brief Encapsulates the main GUI window
+ * \brief Encapsulates the main GUI window
  */
 class MainWindow : public QMainWindow
 {
+
     Q_OBJECT
+
+    // --- External Interface ---
 
     public:
 
+    // -- Construction / Destruction --
+
     /**
-     * @brief Constructor, setting up all attributes
+     * \brief Constructor, setting up all attributes
      *
-     * @param parent The parent widget
+     * \param parent The parent widget
      */
     explicit MainWindow(QWidget *parent = 0);
 
     /**
-     * @brief Destructor - destroys the internal UI structures
+     * \brief Destructor - destroys the internal UI structures
      */
     ~MainWindow();
 
+    // --- Internal Declarations ---
+
     private:
 
+    // -- Helper Functions --
+
     /**
-     * @brief Internal UI structures (managed by Qt framework
+     * \brief Invoke creation of the entire window layout
+     *
+     * This method calls lots of other methods to create the layout
+     * hierarchy in a modular fashion.
+     */
+    void createLayout(void);
+
+    /**
+     * \brief Create a QFrame that is set up for a timeline
+     *
+     * Timelines are intended to be displayed as a vertical 'stack' of
+     * statuses.
+     *
+     * \param title The title to display at the top of the timeline
+     *
+     * \param parent The parent widget
+     *
+     * \return A pointer to the new timeline frame object; note that the
+     * parent widget (if supplied) can delete it
+     */
+    static QFrame* createTimelineFrame(
+            const QString& title,
+            QWidget* parent);
+
+    // -- Attributes --
+
+    /**
+     * \brief Internal UI structures (managed by Qt framework
      */
     Ui::MainWindow *ui;
 
