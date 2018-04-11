@@ -32,7 +32,7 @@ else
     puts "environment: Posix-compliant"
     puts "build using GCC"
 
-    # TODO support clang
+    # TODO support clang / OSX
 end
 
 $wordsize = 32
@@ -59,8 +59,8 @@ def check_curl_support
         raise "could not find CURL_INCLUDE_DIR"
     end
 
-    if (ENV['CURL_LIB_DIR'].to_s.empty?)
-        raise "could not find CURL_LIB_DIR"
+    if (ENV['CURL_LIBRARY'].to_s.empty?)
+        raise "could not find CURL_LIBRARY"
     end
 
 end
@@ -140,8 +140,7 @@ end # bin task
 
 # --- Test ---
 
-desc "run tests"
-task :test => :bin do
+namespace :test do
 
     test_dir = "build/test"
     test_exe_file_name = "test-tootdesk"
@@ -150,7 +149,24 @@ task :test => :bin do
         test_exe_file_name = "test-tootdesk.exe"
     end
 
-    cmd_line = test_dir + "/" + test_exe_file_name
-    sh cmd_line
+    desc "run offline tests only"
+    task :offline => :bin do
+        cmd_line = test_dir + "/" + test_exe_file_name + " ~[online]"
+        sh cmd_line
+    end
 
-end  # test task
+    desc "run online tests only"
+    task :online => :bin do
+        cmd_line = test_dir + "/" + test_exe_file_name + " [online]"
+        sh cmd_line
+    end
+
+    task :all => :bin do
+        cmd_line = test_dir + "/" + test_exe_file_name
+        sh cmd_line
+    end
+
+end # end test namespace
+
+desc "run all tests"
+task :test => "test:all"

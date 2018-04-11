@@ -27,7 +27,7 @@
 #include <catch/catch.hpp>
 #include <json/json.h>
 
-TEST_CASE("jsoncpp","[third-party")
+TEST_CASE("jsoncpp","[third-party]")
 {
 
     std::stringstream input;

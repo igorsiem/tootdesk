@@ -15,8 +15,8 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file curl-test.cpp
- * Simple test to verify the integration of the curl library
+ * \file mastodon-cpp-test.cpp
+ * Simple test to verify the mastodon-cpp library
  * 
  * \author Igor Siemienowicz
  * 
@@ -24,16 +24,19 @@
  */
 
 #include <catch/catch.hpp>
-#include <curl/curl.h>
+#include <mastodon-cpp/mastodon-cpp.hpp>
+#include <mastodon-cpp/easy/all.hpp>
 
-TEST_CASE("curl","[third-party]")
+using Mastodon::Easy;
+
+// This is a really basic test to verify that Mastodon-CPP can go online and
+// get some statuses
+TEST_CASE("mastodon-cpp", "[third-party][online]")
 {
-    REQUIRE(curl_global_init(CURL_GLOBAL_ALL) == 0);
-    CURL* curl = curl_easy_init();
-    REQUIRE(curl);
+   
+    Easy masto("mastodon.social", "");
+    std::string answer;
+    REQUIRE_NOTHROW(masto.get(Mastodon::API::v1::timelines_public, answer));
+    REQUIRE(answer.empty() == false);
 
-    // std::cout << "[DEBUG] cURL version: " << curl_version() << std::endl;
-
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
-}   // end curl test
+}   // end mastodon-cpp test

@@ -24,4 +24,6 @@ add_executable(test-tootdesk ${TEST_SRC})
 target_link_libraries(test-tootdesk
     ${CURL_LIB}
     jsoncpp
+    mastodon-cpp
+    curlpp
 )

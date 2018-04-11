@@ -15,8 +15,8 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file curl-test.cpp
- * Simple test to verify the integration of the curl library
+ * \file jsoncpp-test.cpp
+ * Simple test to verify the integration of the curlcpp library
  * 
  * \author Igor Siemienowicz
  * 
@@ -24,16 +24,19 @@
  */
 
 #include <catch/catch.hpp>
-#include <curl/curl.h>
+#include <curlpp/cURLpp.hpp>
+#include <curlpp/Easy.hpp>
+#include <curlpp/Options.hpp>
 
-TEST_CASE("curl","[third-party]")
+// Simple cURLpp test
+TEST_CASE("curlpp", "[third-party]")
 {
-    REQUIRE(curl_global_init(CURL_GLOBAL_ALL) == 0);
-    CURL* curl = curl_easy_init();
-    REQUIRE(curl);
 
-    // std::cout << "[DEBUG] cURL version: " << curl_version() << std::endl;
+    // Initialises cURL in constructor, and terminates in destructor.
+    cURLpp::Cleanup curl_cleanup;
 
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
-}   // end curl test
+    cURLpp::Easy easy_handle;
+    easy_handle.setOpt(cURLpp::Options::Url("http://example.com/"));  
+    // REQUIRE_NOTHROW(easy_handle.perform());  
+
+}   // end curlpp test
