@@ -41,6 +41,15 @@ $wordsize = 64 if ['foo'].pack("p").size == 8
 puts "word size: #{$wordsize}"
 puts "processors: #{Concurrent.processor_count}"
 
+# Look for the the Qt Cmake directory
+if File.directory?("#{ENV['QT_DIR']}/lib/cmake") == false
+    raise "could not find Qt installation ; please set the 'QT_DIR' "
+        "environment variable to your QT install location (should contain " +
+        "the Qt 'lib' directory)"
+end
+
+puts "Qt environment: #{ENV['QT_DIR']}"
+
 puts "---"
 
 # --- Build / Clean ---
@@ -112,6 +121,31 @@ def assemble_msbuild_commands
 
 end # assemble_msbuild_commands method
 
+dll_dependencies = []
+if Rake::Win32::windows?
+
+    dlls = [
+        "Qt5Gui.dll",
+        "Qt5Core.dll",
+        "Qt5Widgets.dll"]
+
+    target_dir = "build/gui/Release"
+    directory target_dir
+
+    dlls.each do |dll_name|
+        file "#{target_dir}/#{dll_name}" =>
+                ["#{ENV['QT_DIR']}/bin/#{dll_name}",target_dir] do
+            puts "copying #{dll_name}..."
+            FileUtils.cp(
+                "#{ENV['QT_DIR']}/bin/#{dll_name}",
+                target_dir)
+            puts "    ... done"
+        end
+
+        dll_dependencies << "#{target_dir}/#{dll_name}"
+    end # each dll
+end
+
 # Work out the cmake and make build commands
 task :assemble_commands do
     $cmake_config = ""
@@ -137,6 +171,8 @@ task :bin => :cmake do
     sh $make_command
     Dir.chdir ".."
 end # bin task
+
+task :bin => dll_dependencies
 
 # --- Test ---
 
@@ -170,3 +206,19 @@ end # end test namespace
 
 desc "run all tests"
 task :test => "test:all"
+
+# --- Run ---
+
+desc "run the GUI executabe"
+task :run => :bin do
+    exe_dir = "build/gui"
+    exe_name = "tootdesk-gui"
+
+    if Rake::Win32::windows?
+        exe_dir += "/Release"
+        exe_name += ".exe"
+    end
+
+    cmd_line = "#{exe_dir}/#{exe_name}"
+    sh cmd_line
+end

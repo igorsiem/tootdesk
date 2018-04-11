@@ -14,32 +14,24 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is the top-level cmake file
+# Cmake file for specifying how the GUI executable is built
 
-cmake_minimum_required(VERSION 3.10)
-project(tootdesk LANGUAGES CXX)
+# Run moc as needed
+set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
+# Tell Cmake where to find Qt stuff
+set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)
+message("CMAKE_PREFIX_PATH set to '${CMAKE_PREFIX_PATH}'")
 
-# Find cURL manually for windows
-#
-# TODO Figure out why FindCURL doesn't work
-SET(CURL_LIB "curl")
-if (WIN32)
-    set(CURL_LIB "$ENV{CURL_LIBRARY}")
-    set(CURLPP_LIB "$ENV{CURLPP_LIBRARY}")
-endif()
+# Find QtWidgets
+find_package(Qt5Widgets)
 
-include_directories(
-    .
-    third-party
-    third-party/jsoncpp
-    third-party/curlpp/include
-    third-party/mastodon-cpp
-    $ENV{CURL_INCLUDE_DIR}      # only needed for Windows
-)
+# Sort out the UI files and their generated headers
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+file(GLOB UI_FILES "*.ui")
+qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 
-add_subdirectory(gui)
-add_subdirectory(test)
-add_subdirectory(third-party)
+file(GLOB_RECURSE GUI_SRC *.cpp *.rc *.qrc)
+add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
+
+target_link_libraries(tootdesk-gui Qt5::Widgets)
