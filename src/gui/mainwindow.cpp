@@ -25,6 +25,8 @@
 
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 #include "mainwindow.h"
@@ -35,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    createLayout();
+    setup();
 }   // end constructor
 
 MainWindow::~MainWindow()
@@ -43,12 +45,10 @@ MainWindow::~MainWindow()
     delete ui;
 }   // end destructor
 
-void MainWindow::createLayout(void)
+void MainWindow::setup(void)
 {
 
-    // Set the main, central layout as an h-box
-    auto centralLayout = new QHBoxLayout(ui->centralWidget);
-    ui->centralWidget->setLayout(centralLayout);
+    ui->centralWidget->setLayout(new QHBoxLayout(ui->centralWidget));
 
     // Create two timeline frames
     //
@@ -56,12 +56,10 @@ void MainWindow::createLayout(void)
     auto tf1 = createTimelineFrame(
                 "Federated Timeline",
                 ui->centralWidget);
-    centralLayout->addWidget(tf1);
+    ui->centralWidget->layout()->addWidget(tf1);
 
-    auto tf2 = createTimelineFrame(
-                "Another Timeline",
-                ui->centralWidget);
-    centralLayout->addWidget(tf2);
+    auto tf2 = createColumnFrame(ui->centralWidget);
+    ui->centralWidget->layout()->addWidget(tf2);
 
 }   // end createLayout method
 
@@ -71,18 +69,75 @@ QFrame* MainWindow::createTimelineFrame(
 {
 
     // Create the frame and a layout for it.
-    auto frame = new QFrame(parent);
-    frame->setMinimumSize(500, 500);
-    auto layout = new QVBoxLayout(frame);
-    frame->setLayout(layout);
+    QFrame* frame = createColumnFrame(parent);
 
-    // Create a title label, and a scroll area beneath it
     auto label = new QLabel(frame);
     label->setText(title);
-    layout->addWidget(label);
+    frame->layout()->addWidget(label);
+
+    auto addressWidget = createAddressWidget("Go", frame);
+    frame->layout()->addWidget(addressWidget);
 
     auto scrollArea = new QScrollArea(frame);
-    layout->addWidget(scrollArea);
+    frame->layout()->addWidget(scrollArea);
+
+    // TODO demo code - not for production
+    auto item = createTimelineItemWidget(scrollArea);
 
     return frame;
+
 }   // end createTimelineFrame
+
+QWidget* MainWindow::createTimelineItemWidget(QWidget* parent)
+{
+    auto itemWidget = new QWidget(parent);
+
+    auto mainLayout = new QHBoxLayout(itemWidget);
+    itemWidget->setLayout(mainLayout);
+
+    // TODO make a proper avatar
+    auto avatar = new QLabel(itemWidget);
+    avatar->setText("<avatar>");
+    mainLayout->addWidget(avatar);
+
+    auto textLayout = new QVBoxLayout(itemWidget);
+    mainLayout->addLayout(textLayout);
+    
+    // TOOD add proper author info
+    auto author = new QLabel(itemWidget);
+    author->setText("<author>");
+    textLayout->addWidget(author);
+
+    // TODO add proper content info
+    auto content = new QLabel(itemWidget);
+    content->setText("<content>");
+    textLayout->addWidget(content);
+
+    return itemWidget;
+}   // end createTimelineItemWidget
+
+QWidget* MainWindow::createAddressWidget(
+        const QString& buttonText,
+        QWidget* parent)
+{
+    auto widget = new QWidget(parent);
+    widget->setLayout(new QHBoxLayout(widget));
+
+    auto addressLineEdit = new QLineEdit(widget);
+    widget->layout()->addWidget(addressLineEdit);    
+
+    auto pushButton = new QPushButton(widget);
+    pushButton->setText(buttonText);
+    widget->layout()->addWidget(pushButton);
+
+    return widget;
+}   // end createServerAddressWidget
+
+QFrame* MainWindow::createColumnFrame(QWidget* parent)
+{
+    auto frame = new QFrame(parent);
+    frame->setMinimumSize(500, 500);
+    frame->setLayout(new QVBoxLayout(frame));
+
+    return frame;
+}   // end createColumnFrame

@@ -23,11 +23,12 @@
  * \copyright GPL 3.0
  */
 
-#ifndef _td_gui_mainwindow_h
-#define _td_gui_mainwindow_h
-
+#include <tuple>
 #include <QMainWindow>
 #include <QScrollArea>
+
+#ifndef _td_gui_mainwindow_h
+#define _td_gui_mainwindow_h
 
 namespace Ui {
 class MainWindow;
@@ -71,7 +72,7 @@ class MainWindow : public QMainWindow
      * This method calls lots of other methods to create the layout
      * hierarchy in a modular fashion.
      */
-    void createLayout(void);
+    void setup(void);
 
     /**
      * \brief Create a QFrame that is set up for a timeline
@@ -89,6 +90,39 @@ class MainWindow : public QMainWindow
     static QFrame* createTimelineFrame(
             const QString& title,
             QWidget* parent);
+
+    /**
+     * \brief Create a widget encapsulating a single item on the timeline
+     * 
+     * \param parent The parent widget
+     * 
+     * \return The widget containing the item
+     */
+    static QWidget* createTimelineItemWidget(QWidget* parent);
+
+    /**
+     * \brief Create a address widget, with an edit box and a button with
+     * text
+     * 
+     * \param buttonText The text of the button
+     * 
+     * \param parent The parent widget
+     * 
+     * \return The newly created address widget
+     */
+    static QWidget* createAddressWidget(
+        const QString& buttonText,
+        QWidget* parent);
+
+    /**
+     * \brief Create a standardised frame for a 'column' of data
+     * 
+     * \param parent The parent widget for the column
+     * 
+     * \return The newly created frame and its underlying layout object (for
+     * subsequent insertions)
+     */
+    static QFrame* createColumnFrame(QWidget* parent);
 
     // -- Attributes --
 
