@@ -34,4 +34,10 @@ qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 file(GLOB_RECURSE GUI_SRC *.cpp *.rc *.qrc)
 add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
 
-target_link_libraries(tootdesk-gui Qt5::Widgets)
+target_link_libraries(tootdesk-gui
+    Qt5::Widgets
+    ${CURL_LIB}
+    jsoncpp
+    mastodon-cpp
+    curlpp
+)

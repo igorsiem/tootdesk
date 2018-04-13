@@ -6,6 +6,8 @@
    <string>TootDesk</string>
   </property>
   <widget class="QWidget" name="centralWidget"/>
+  <!--
+  TODO not worrying about menu and toolbar for now, but may add them later
   <widget class="QMenuBar" name="menuBar" />
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -15,6 +17,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  -->
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

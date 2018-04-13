@@ -24,8 +24,12 @@
  */
 
 #include <tuple>
+#include <QListWidget>
+#include <QListWidgetItem>
 #include <QMainWindow>
-#include <QScrollArea>
+#include <QPushButton>
+#include <mastodon-cpp/mastodon-cpp.hpp>
+#include <mastodon-cpp/easy/all.hpp>
 
 #ifndef _td_gui_mainwindow_h
 #define _td_gui_mainwindow_h
@@ -66,39 +70,23 @@ class MainWindow : public QMainWindow
 
     // -- Helper Functions --
 
-    /**
-     * \brief Invoke creation of the entire window layout
-     *
-     * This method calls lots of other methods to create the layout
-     * hierarchy in a modular fashion.
-     */
+    // - Layout Stuff -
+
     void setup(void);
 
-    /**
-     * \brief Create a QFrame that is set up for a timeline
-     *
-     * Timelines are intended to be displayed as a vertical 'stack' of
-     * statuses.
-     *
-     * \param title The title to display at the top of the timeline
-     *
-     * \param parent The parent widget
-     *
-     * \return A pointer to the new timeline frame object; note that the
-     * parent widget (if supplied) can delete it
-     */
-    static QFrame* createTimelineFrame(
+    static std::tuple<QFrame*,QPushButton*, QListWidget*>
+    createTimelineFrame(
             const QString& title,
             QWidget* parent);
 
-    /**
-     * \brief Create a widget encapsulating a single item on the timeline
-     * 
-     * \param parent The parent widget
-     * 
-     * \return The widget containing the item
-     */
-    static QWidget* createTimelineItemWidget(QWidget* parent);
+    static QListWidgetItem* createTimelineItemWidget(
+        QListWidget* parent,
+        const Mastodon::Easy::Easy::Status& status);
+
+    static QListWidgetItem* createTimelineItemWidget(
+        QListWidget* parent,
+        const QString& a,
+        const QString& c);
 
     /**
      * \brief Create a address widget, with an edit box and a button with
@@ -108,9 +96,10 @@ class MainWindow : public QMainWindow
      * 
      * \param parent The parent widget
      * 
-     * \return The newly created address widget
+     * \return The newly created address widget, and the pushbutton next to
+     * it
      */
-    static QWidget* createAddressWidget(
+    static std::tuple<QWidget*, QPushButton*> createAddressWidget(
         const QString& buttonText,
         QWidget* parent);
 
@@ -124,12 +113,31 @@ class MainWindow : public QMainWindow
      */
     static QFrame* createColumnFrame(QWidget* parent);
 
+    // - Event Handlers -
+
+    private slots:
+
+    void handleButton(void);
+
+    // - Mastodon Stuff -
+
+    private:
+
+    using statusProcessorFn =
+        std::function<void(const Mastodon::Easy::Easy::Status& status)>;
+
+    static void getPublicTimeline(
+        const std::string& address,
+        statusProcessorFn processorFn);
+
     // -- Attributes --
 
     /**
      * \brief Internal UI structures (managed by Qt framework
      */
     Ui::MainWindow *ui;
+
+    QListWidget* m_statusListWidget;
 
 };  // end MainWindow class
 
