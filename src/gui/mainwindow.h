@@ -16,7 +16,7 @@
 
 /**
  * \file mainwindow.h
- * Declares the `mainwindow` class
+ * Declares the `MainWindow` class
  *
  * \author Igor Siemienowicz
  *
@@ -30,9 +30,10 @@
 #include <QPushButton>
 #include <mastodon-cpp/mastodon-cpp.hpp>
 #include <mastodon-cpp/easy/all.hpp>
+#include "timelinewidget.h"
 
-#ifndef _td_gui_mainwindow_h
-#define _td_gui_mainwindow_h
+#ifndef _td_gui_mainwindow_h_included
+#define _td_gui_mainwindow_h_included
 
 namespace Ui {
 class MainWindow;
@@ -62,7 +63,7 @@ class MainWindow : public QMainWindow
     /**
      * \brief Destructor - destroys the internal UI structures
      */
-    ~MainWindow();
+    virtual ~MainWindow();
 
     // --- Internal Declarations ---
 
@@ -74,19 +75,10 @@ class MainWindow : public QMainWindow
 
     void setup(void);
 
-    static std::tuple<QFrame*,QPushButton*, QListWidget*>
+    static std::tuple<QFrame*,QPushButton*, TimelineWidget*>
     createTimelineFrame(
             const QString& title,
             QWidget* parent);
-
-    static QListWidgetItem* createTimelineItemWidget(
-        QListWidget* parent,
-        const Mastodon::Easy::Easy::Status& status);
-
-    static QListWidgetItem* createTimelineItemWidget(
-        QListWidget* parent,
-        const QString& a,
-        const QString& c);
 
     /**
      * \brief Create a address widget, with an edit box and a button with
@@ -137,7 +129,7 @@ class MainWindow : public QMainWindow
      */
     Ui::MainWindow *ui;
 
-    QListWidget* m_statusListWidget;
+    TimelineWidget* m_timelineWidget;
 
 };  // end MainWindow class
 

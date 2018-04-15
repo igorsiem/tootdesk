@@ -16,7 +16,7 @@
 
 /**
  * \file mainwindow.cpp
- * Implements the `mainwindow` class
+ * Implements the `MainWindow` class
  *
  * \author Igor Siemienowicz
  *
@@ -33,10 +33,13 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "statuswidget.h"
+#include "timelinewidget.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_timelineWidget(nullptr)
 {
     ui->setupUi(this);
     setup();
@@ -58,8 +61,8 @@ void MainWindow::setup(void)
     QFrame* tf1 = nullptr;
     QPushButton* addressPushButton = nullptr;
     // QScrollArea* statusScrollArea = nullptr;
-    std::tie(tf1,addressPushButton, m_statusListWidget) =
-    createTimelineFrame(
+    std::tie(tf1,addressPushButton, m_timelineWidget) =
+        createTimelineFrame(
                 "Federated Timeline",
                 ui->centralWidget);
     ui->centralWidget->layout()->addWidget(tf1);
@@ -75,7 +78,7 @@ void MainWindow::setup(void)
 
 }   // end createLayout method
 
-std::tuple<QFrame*,QPushButton*,QListWidget*>
+std::tuple<QFrame*,QPushButton*,TimelineWidget*>
 MainWindow::createTimelineFrame(
         const QString& title,
         QWidget* parent)
@@ -95,69 +98,13 @@ MainWindow::createTimelineFrame(
     frame->layout()->addWidget(addressWidget);
 
     // auto scrollArea = new QScrollArea(frame);
-    auto listWidget = new QListWidget(frame);
-    frame->layout()->addWidget(listWidget);
+    // auto listWidget = new 
+    auto timelineWidget = new TimelineWidget(frame);
+    frame->layout()->addWidget(timelineWidget);
 
-    // TODO demo code - not for production
-    auto item = createTimelineItemWidget(listWidget, "Hello", "There");
-
-    return std::make_tuple(frame, addressPushButton, listWidget);
+    return std::make_tuple(frame, addressPushButton, timelineWidget);
 
 }   // end createTimelineFrame
-
-QListWidgetItem* MainWindow::createTimelineItemWidget(
-        QListWidget* parent,
-        const QString& a,
-        const QString& c)
-{
-
-    auto contentWidget = new QWidget();
-
-    auto mainLayout = new QHBoxLayout(contentWidget);
-    contentWidget->setLayout(mainLayout);
-
-    // TODO make a proper avatar
-    auto avatar = new QLabel(contentWidget);
-    avatar->setText("<avatar>");
-    avatar->setBaseSize(100, 100);
-    avatar->setMaximumSize(100, 100);
-    mainLayout->addWidget(avatar);
-
-    auto textLayout = new QVBoxLayout();
-    // mainLayout->addLayout(textLayout);
-    mainLayout->addItem(textLayout);
-    
-    // TOOD add proper author info
-    auto author = new QLabel(contentWidget);
-    author->setText(a);
-    textLayout->addWidget(author);
-
-    // TODO add proper content info
-    auto content = new QLabel(contentWidget);
-    content->setText(c);
-    textLayout->addWidget(content);
-
-    auto listWidgetItem = new QListWidgetItem;
-    listWidgetItem->setSizeHint(
-        QSize(
-            contentWidget->size().width(),
-           100));
-    parent->insertItem(0, listWidgetItem);
-    parent->setItemWidget(listWidgetItem, contentWidget);
-
-    return listWidgetItem;
-    
-}
-
-QListWidgetItem* MainWindow::createTimelineItemWidget(
-        QListWidget* parent,
-        const Mastodon::Easy::Easy::Status& status)
-{
-    return createTimelineItemWidget(
-        parent,
-        QString::fromStdString(status.account().acct()),
-        QString::fromStdString(status.content()));
-}   // end createTimelineItemWidget
 
 std::tuple<QWidget*, QPushButton*> MainWindow::createAddressWidget(
         const QString& buttonText,
@@ -195,10 +142,7 @@ void MainWindow::handleButton(void)
         getPublicTimeline("freeradical.zone",
             [&counter,this](const Mastodon::Easy::Easy::Status& status)
             {
-                createTimelineItemWidget(m_statusListWidget, status);
-                // createTimelineItemWidget(m_statusScrollArea, "this", "that");
-                
-
+                m_timelineWidget->add(status);
                 counter++;
             });
 
