@@ -29,10 +29,13 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QThreadPool>
 #include <QVBoxLayout>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+#include "lambdarunnable.h"
 #include "statuswidget.h"
 #include "timelinewidget.h"
 
@@ -100,6 +103,13 @@ MainWindow::createTimelineFrame(
     // auto scrollArea = new QScrollArea(frame);
     // auto listWidget = new 
     auto timelineWidget = new TimelineWidget(frame);
+
+    connect(
+        this,
+        SIGNAL(statusDecoded(ConstStatusPtr)),
+        timelineWidget,
+        SLOT(add(ConstStatusPtr)));
+
     frame->layout()->addWidget(timelineWidget);
 
     return std::make_tuple(frame, addressPushButton, timelineWidget);
@@ -138,6 +148,17 @@ void MainWindow::handleButton(void)
     try
     {
 
+        QThreadPool::globalInstance()->start(new LambdaRunnable(
+            [this](void)
+            {
+                getPublicTimeline("freeradical.zone",
+                    [this](ConstStatusPtr status)
+                    {
+                        emit(statusDecoded(status));
+                    });
+            }));
+
+        /*
         int counter = 0;
         getPublicTimeline("freeradical.zone",
             [&counter,this](const Mastodon::Easy::Easy::Status& status)
@@ -154,6 +175,10 @@ void MainWindow::handleButton(void)
             "Loaded Toots",
             QString::fromStdString(strm.str())
         );
+        */
+
+       
+
     }
     catch (const QException& error)
     {
@@ -182,7 +207,7 @@ void MainWindow::handleButton(void)
 
 void MainWindow::getPublicTimeline(
         const std::string& address,
-        statusProcessorFn processorFn)
+        StatusProcessorFn processorFn)
 {
     using Mastodon::Easy;
     Easy masto(address, "");
@@ -194,7 +219,8 @@ void MainWindow::getPublicTimeline(
             Mastodon::Easy::Easy::json_array_to_vector(response))
 
     {
-        Easy::Status status(str);
+        // Easy::Status status(str);
+        auto status = std::make_shared<status_t>(str);
         processorFn(status);
     }
 }   // end getPublicTimeline

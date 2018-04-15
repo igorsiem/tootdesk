@@ -23,10 +23,8 @@
  * \copyright GPL 3.0
  */
 
-#include <memory>
 #include <QWidget>
-#include <mastodon-cpp/mastodon-cpp.hpp>
-#include <mastodon-cpp/easy/all.hpp>
+#include "mastodontypes.h"
 
 #ifndef _td_gui_statuswidget_h_included
 #define _td_gui_statuswidget_h_included
@@ -34,7 +32,7 @@
 /**
  * \brief A widget for displaying a Mastodon status item
  * 
- * \todo Expand documentation
+ * \todo Expand this documentation
  * 
  * \todo This is just a barebones display of status text items - needs lots
  * of layout work
@@ -47,13 +45,6 @@ class StatusWidget : public QWidget
     // --- External Interface ---
 
     public:
-
-    // -- Public Sub-types --
-
-    /**
-     * \brief The mastodon status class
-     */
-    using status_t = Mastodon::Easy::Easy::Status;
 
     // -- Constructor / Destructor --
 

@@ -15,34 +15,41 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file timelinewidget.cpp
- * Implements the `TimelineWidget` class
+ * \file lambdarunnable.h
+ * Declares some types related to Mastodon-cpp
  *
  * \author Igor Siemienowicz
  *
  * \copyright GPL 3.0
  */
 
-#include "timelinewidget.h"
+#include <memory>
 
-TimelineWidget::TimelineWidget(QWidget* parent) : QListWidget(parent)
-{
-}   // end constructor
+#include <QMetaType>
 
-void TimelineWidget::add(ConstStatusPtr status)
-{
+#include <mastodon-cpp/mastodon-cpp.hpp>
+#include <mastodon-cpp/easy/all.hpp>
 
-    auto statusWidget = new StatusWidget(*status, this);
+#ifndef _td_gui_mastodontypes_h_included
+#define _td_gui_mastodontypes_h_included
 
-    auto listWidgetItem = new QListWidgetItem;
+/**
+ * \brief The mastodon status class
+ */
+using status_t = Mastodon::Easy::Easy::Status;
 
-    // TODO fix sizing, so that the status widget tells us what size it needs
-    listWidgetItem->setSizeHint(
-        QSize(
-            statusWidget->size().width(),
-            100));
+/**
+ * \brief A shared pointer to a status object
+ */
+using StatusPtr = std::shared_ptr<status_t>;
 
-    insertItem(0, listWidgetItem);
-    setItemWidget(listWidgetItem, statusWidget);
+/**
+ * \brief A shared pointer to a const status object
+ */
+using ConstStatusPtr = std::shared_ptr<const status_t>;
 
-}   // end add method
+// Set up Qt metatypes for a status pointer
+Q_DECLARE_METATYPE(StatusPtr);
+Q_DECLARE_METATYPE(ConstStatusPtr);
+
+#endif

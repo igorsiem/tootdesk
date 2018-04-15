@@ -23,8 +23,9 @@
  * \copyright GPL 3.0
  */
 
-#include "mainwindow.h"
 #include <QApplication>
+#include "mainwindow.h"
+#include "mastodontypes.h"
 
 /**
  * @brief Entry point to the GUI executable
@@ -37,6 +38,11 @@
  */
 int main(int argc, char *argv[])
 {
+
+    // Declare our Qt metatypes
+    qRegisterMetaType<StatusPtr>("StatusPtr");
+    qRegisterMetaType<ConstStatusPtr>("ConstStatusPtr");
+
     QApplication a(argc, argv);
     MainWindow w;
     w.showMaximized();

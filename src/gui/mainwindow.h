@@ -75,34 +75,15 @@ class MainWindow : public QMainWindow
 
     void setup(void);
 
-    static std::tuple<QFrame*,QPushButton*, TimelineWidget*>
+    std::tuple<QFrame*,QPushButton*, TimelineWidget*>
     createTimelineFrame(
             const QString& title,
             QWidget* parent);
 
-    /**
-     * \brief Create a address widget, with an edit box and a button with
-     * text
-     * 
-     * \param buttonText The text of the button
-     * 
-     * \param parent The parent widget
-     * 
-     * \return The newly created address widget, and the pushbutton next to
-     * it
-     */
     static std::tuple<QWidget*, QPushButton*> createAddressWidget(
         const QString& buttonText,
         QWidget* parent);
 
-    /**
-     * \brief Create a standardised frame for a 'column' of data
-     * 
-     * \param parent The parent widget for the column
-     * 
-     * \return The newly created frame and its underlying layout object (for
-     * subsequent insertions)
-     */
     static QFrame* createColumnFrame(QWidget* parent);
 
     // - Event Handlers -
@@ -111,16 +92,20 @@ class MainWindow : public QMainWindow
 
     void handleButton(void);
 
+    signals:
+
+    void statusDecoded(ConstStatusPtr status);
+
     // - Mastodon Stuff -
 
     private:
 
-    using statusProcessorFn =
-        std::function<void(const Mastodon::Easy::Easy::Status& status)>;
+    using StatusProcessorFn =
+        std::function<void(ConstStatusPtr status)>;
 
     static void getPublicTimeline(
         const std::string& address,
-        statusProcessorFn processorFn);
+        StatusProcessorFn processorFn);
 
     // -- Attributes --
 

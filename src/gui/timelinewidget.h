@@ -29,6 +29,16 @@
 #ifndef _td_gui_timelinewidget_h_included
 #define _td_gui_timelinewidget_h_included
 
+/**
+ * \brief A widget for displaying statuses (stati?) in a vertical 'timeline'
+ * format
+ * 
+ * \todo Add a `clear` method for emptying the timeline
+ * 
+ * \param Add additional options for ordering / filtering
+ * 
+ * \param Expand this documentation
+ */
 class TimelineWidget : public QListWidget
 {
 
@@ -38,20 +48,28 @@ class TimelineWidget : public QListWidget
 
     public:
 
-    // -- Public Sub-types --
-
-    /**
-     * \brief The mastodon status class
-     */
-    using status_t = StatusWidget::status_t;
-
     // -- Construction / Destruction --
 
     explicit TimelineWidget(QWidget* parent);
 
+    /**
+     * \brief Trivial destructor
+     */
     virtual ~TimelineWidget(void) {}
 
-    void add(const status_t& status);
+    // -- Status Item Management --
+
+    public slots:
+
+    /**
+     * \brief Add a new status item to the displayed timeline
+     * 
+     * This method creates a new StatusWidget object from the given status,
+     * and places it in the displayed timeline.
+     * 
+     * \param status The Mastodon status item
+     */
+    void add(ConstStatusPtr status);
 
     // --- Internal Declarations ---
 
