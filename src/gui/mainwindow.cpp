@@ -36,6 +36,7 @@
 #include "ui_mainwindow.h"
 
 #include "lambdarunnable.h"
+#include "simpleaddresswidget.h"
 #include "statuswidget.h"
 #include "timelinewidget.h"
 
@@ -60,29 +61,15 @@ void MainWindow::setup(void)
 
     // Create two timeline frames
     //
-    // TODO This is really only demo code, not for production
-    QFrame* tf1 = nullptr;
-    QPushButton* addressPushButton = nullptr;
-    // QScrollArea* statusScrollArea = nullptr;
-    std::tie(tf1,addressPushButton, m_timelineWidget) =
-        createTimelineFrame(
-                "Federated Timeline",
-                ui->centralWidget);
+    auto tf1 = createTimelineFrame("Federated Timeline", ui->centralWidget);
     ui->centralWidget->layout()->addWidget(tf1);
-
-    connect(
-        addressPushButton,
-        SIGNAL(released()),
-        this,
-        SLOT(handleButton()));
 
     auto tf2 = createColumnFrame(ui->centralWidget);
     ui->centralWidget->layout()->addWidget(tf2);
 
 }   // end createLayout method
 
-std::tuple<QFrame*,QPushButton*,TimelineWidget*>
-MainWindow::createTimelineFrame(
+QFrame* MainWindow::createTimelineFrame(
         const QString& title,
         QWidget* parent)
 {
@@ -94,44 +81,42 @@ MainWindow::createTimelineFrame(
     label->setText(title);
     frame->layout()->addWidget(label);
 
-    QPushButton* addressPushButton = nullptr;
-    QWidget* addressWidget = nullptr;
-    std::tie(addressWidget, addressPushButton) =
-        createAddressWidget("Go", frame);
+    auto addressWidget = new SimpleAddressWidget(
+       "Go",
+       [this](const QString& address)
+       {
+            m_timelineWidget->clear();
+
+            QThreadPool::globalInstance()->start(
+                new LambdaRunnable(
+                    [this,&address](void)
+                    {
+                        getPublicTimeline(address.toStdString(),
+                            [this](ConstStatusPtr status)
+                            {
+                                emit(statusDecoded(status));
+                            });
+                    }));           
+       },
+       frame);
+
     frame->layout()->addWidget(addressWidget);
 
     // auto scrollArea = new QScrollArea(frame);
     // auto listWidget = new 
-    auto timelineWidget = new TimelineWidget(frame);
+    m_timelineWidget = new TimelineWidget(frame);
 
     connect(
         this,
         SIGNAL(statusDecoded(ConstStatusPtr)),
-        timelineWidget,
+        m_timelineWidget,
         SLOT(add(ConstStatusPtr)));
 
-    frame->layout()->addWidget(timelineWidget);
+    frame->layout()->addWidget(m_timelineWidget);
 
-    return std::make_tuple(frame, addressPushButton, timelineWidget);
+    return frame;
 
 }   // end createTimelineFrame
-
-std::tuple<QWidget*, QPushButton*> MainWindow::createAddressWidget(
-        const QString& buttonText,
-        QWidget* parent)
-{
-    auto widget = new QWidget(parent);
-    widget->setLayout(new QHBoxLayout());
-
-    auto addressLineEdit = new QLineEdit(widget);
-    widget->layout()->addWidget(addressLineEdit);    
-
-    auto pushButton = new QPushButton(widget);
-    pushButton->setText(buttonText);
-    widget->layout()->addWidget(pushButton);
-
-    return std::make_tuple(widget, pushButton);
-}   // end createServerAddressWidget
 
 QFrame* MainWindow::createColumnFrame(QWidget* parent)
 {
@@ -141,69 +126,6 @@ QFrame* MainWindow::createColumnFrame(QWidget* parent)
 
     return frame;
 }   // end createColumnFrame
-
-void MainWindow::handleButton(void)
-{
-
-    try
-    {
-
-        QThreadPool::globalInstance()->start(new LambdaRunnable(
-            [this](void)
-            {
-                getPublicTimeline("freeradical.zone",
-                    [this](ConstStatusPtr status)
-                    {
-                        emit(statusDecoded(status));
-                    });
-            }));
-
-        /*
-        int counter = 0;
-        getPublicTimeline("freeradical.zone",
-            [&counter,this](const Mastodon::Easy::Easy::Status& status)
-            {
-                m_timelineWidget->add(status);
-                counter++;
-            });
-
-        std::stringstream strm;
-        strm << counter << " toot(s)";
-
-        QMessageBox::information(
-            this,
-            "Loaded Toots",
-            QString::fromStdString(strm.str())
-        );
-        */
-
-       
-
-    }
-    catch (const QException& error)
-    {
-        QMessageBox::critical(
-            this,
-            "Refresh",
-            error.what());
-    } 
-    catch (const std::exception& error)
-    {
-        QMessageBox::critical(
-            this,
-            "Refresh",
-            error.what());
-    }
-    catch (...)
-    {
-        QMessageBox::critical(
-            this,
-            "Refresh",
-            "An unknown error occurred. The operation could not be "
-            "completed");
-
-    }
-}   // end handleButton
 
 void MainWindow::getPublicTimeline(
         const std::string& address,

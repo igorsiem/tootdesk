@@ -75,22 +75,11 @@ class MainWindow : public QMainWindow
 
     void setup(void);
 
-    std::tuple<QFrame*,QPushButton*, TimelineWidget*>
-    createTimelineFrame(
-            const QString& title,
-            QWidget* parent);
-
-    static std::tuple<QWidget*, QPushButton*> createAddressWidget(
-        const QString& buttonText,
-        QWidget* parent);
+    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
 
     static QFrame* createColumnFrame(QWidget* parent);
 
     // - Event Handlers -
-
-    private slots:
-
-    void handleButton(void);
 
     signals:
 
@@ -103,7 +92,7 @@ class MainWindow : public QMainWindow
     using StatusProcessorFn =
         std::function<void(ConstStatusPtr status)>;
 
-    static void getPublicTimeline(
+    void getPublicTimeline(
         const std::string& address,
         StatusProcessorFn processorFn);
 
