@@ -27,6 +27,7 @@
 ///#include <QListWidget>
 ///#include <QListWidgetItem>
 #include <QMainWindow>
+#include <QSettings>
 ///#include <QPushButton>
 ///#include <mastodon-cpp/mastodon-cpp.hpp>
 ///#include <mastodon-cpp/easy/all.hpp>
@@ -56,9 +57,11 @@ class MainWindow : public QMainWindow
     /**
      * \brief Constructor, setting up all attributes
      *
+     * \param settings Persistent settings object for this application
+     *
      * \param parent The parent widget
      */
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QSettings& settings, QWidget *parent = 0);
 
     /**
      * \brief Destructor - destroys the internal UI structures
@@ -66,6 +69,17 @@ class MainWindow : public QMainWindow
     virtual ~MainWindow();
 
     // --- Internal Declarations ---
+
+    protected:
+
+    // -- Event Handler Overrides --
+
+    /**
+     * \brief Write window state and geometry to persistent storage
+     * 
+     * \param event The event object (passed to base-class implementation) 
+     */
+    virtual void closeEvent(QCloseEvent *event) override;
 
     private:
 
@@ -102,6 +116,12 @@ class MainWindow : public QMainWindow
      * \brief Internal UI structures (managed by Qt framework
      */
     Ui::MainWindow *ui;
+
+    /**
+     * \brief Persistent settings object for recording various app settings
+     * such as window geometry
+     */
+    QSettings& m_settings;
 
 ///    TimelineWidget* m_timelineWidget;
 

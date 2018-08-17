@@ -24,8 +24,10 @@
  */
 
 #include <QApplication>
+#include <QSettings>
+
 #include "mainwindow.h"
-#include "mastodontypes.h"
+///#include "mastodontypes.h"
 
 /**
  * @brief Entry point to the GUI executable
@@ -44,9 +46,11 @@ int main(int argc, char *argv[])
 ///    qRegisterMetaType<ConstStatusPtr>("ConstStatusPtr");
 
     QApplication a(argc, argv);
-    MainWindow w;
-    w.showMaximized();
-    // w.show();
+    QSettings settings("Igor Siemienowicz", "TootDesk");
+    MainWindow w(settings);
+///    w.showMaximized();
+    w.show();
 
     return a.exec();
-}
+}   // end main function
+
