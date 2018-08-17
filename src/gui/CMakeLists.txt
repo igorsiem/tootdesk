@@ -36,8 +36,8 @@ add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
 
 target_link_libraries(tootdesk-gui
     Qt5::Widgets
-    ${CURL_LIB}
-    jsoncpp
     mastodon-cpp
     curlpp
+    ${CURL_LIB}
+    jsoncpp
 )
