@@ -39,9 +39,9 @@
 int main(int argc, char *argv[])
 {
 
-    // Declare our Qt metatypes
-    qRegisterMetaType<StatusPtr>("StatusPtr");
-    qRegisterMetaType<ConstStatusPtr>("ConstStatusPtr");
+///    // Declare our Qt metatypes
+///    qRegisterMetaType<StatusPtr>("StatusPtr");
+///    qRegisterMetaType<ConstStatusPtr>("ConstStatusPtr");
 
     QApplication a(argc, argv);
     MainWindow w;

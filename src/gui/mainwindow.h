@@ -23,14 +23,14 @@
  * \copyright GPL 3.0
  */
 
-#include <tuple>
-#include <QListWidget>
-#include <QListWidgetItem>
+///#include <tuple>
+///#include <QListWidget>
+///#include <QListWidgetItem>
 #include <QMainWindow>
-#include <QPushButton>
-#include <mastodon-cpp/mastodon-cpp.hpp>
-#include <mastodon-cpp/easy/all.hpp>
-#include "timelinewidget.h"
+///#include <QPushButton>
+///#include <mastodon-cpp/mastodon-cpp.hpp>
+///#include <mastodon-cpp/easy/all.hpp>
+///#include "timelinewidget.h"
 
 #ifndef _td_gui_mainwindow_h_included
 #define _td_gui_mainwindow_h_included
@@ -75,26 +75,26 @@ class MainWindow : public QMainWindow
 
     void setup(void);
 
-    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
+///    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
 
-    static QFrame* createColumnFrame(QWidget* parent);
+///    static QFrame* createColumnFrame(QWidget* parent);
 
     // - Event Handlers -
 
     signals:
 
-    void statusDecoded(ConstStatusPtr status);
+///    void statusDecoded(ConstStatusPtr status);
 
     // - Mastodon Stuff -
 
     private:
 
-    using StatusProcessorFn =
-        std::function<void(ConstStatusPtr status)>;
-
-    void getPublicTimeline(
-        const std::string& address,
-        StatusProcessorFn processorFn);
+///    using StatusProcessorFn =
+///        std::function<void(ConstStatusPtr status)>;
+///
+///    void getPublicTimeline(
+///        const std::string& address,
+///        StatusProcessorFn processorFn);
 
     // -- Attributes --
 
@@ -103,7 +103,7 @@ class MainWindow : public QMainWindow
      */
     Ui::MainWindow *ui;
 
-    TimelineWidget* m_timelineWidget;
+///    TimelineWidget* m_timelineWidget;
 
 };  // end MainWindow class
 
