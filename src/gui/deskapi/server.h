@@ -23,6 +23,7 @@
  * \copyright GPL 3.0
  */
 
+#include <memory>
 #include <QUrl>
 
 #ifndef _td_gui_deskapi_h_included
@@ -30,6 +31,11 @@
 
 namespace TootDesk { namespace Api {
 
+/**
+ * \brief A mastodon Server Instance
+ *
+ * \todo Expand this doco
+ */
 class Server
 {
 
@@ -42,16 +48,18 @@ class Server
     /**
      * \brief Initialise the server object with its URL
      *
+     * \brief A human-readable name for the server instance
+     *
      * \param url The URL of the Server
      */
-    explicit Server(QUrl url = QUrl());
+    Server(QString name, QUrl url);
 
     /**
-     * \brief Initialse with a string URL
+     * \brief Initialise with a string URL
      *
      * \param url The URL of the server
      */
-    explicit Server(QString url);
+    explicit Server(QString url = "");
 
     virtual ~Server(void) = default;    ///< Default destructor
 
@@ -98,6 +106,26 @@ class Server
     bool isValid(void) const;
 
     /**
+     * \brief Retrieve the human-readable name of the Server
+     *
+     * Note that if a human-readable name has not been set, the result of
+     * `mastodonAddress` is returned instead (as a `QString`).
+     *
+     * \return The human-readable name of the Server
+     */
+    QString name(void) const;
+
+    /**
+     * \brief Set the human-readable name of the Server
+     *
+     * If this is set to an empty string, the human-readable name will be the
+     * result of `mastodonAddress` instead.
+     *
+     * \param name The name to set
+     */
+    void setName(QString name) { m_name = std::move(name); }
+
+    /**
      * \brief Retrieve the Server URL
      *
      * \return The Server URL
@@ -141,6 +169,13 @@ class Server
     protected:
 
     /**
+     * \brief Human-readable name for the Instance
+     *
+     * This may be empty. If so, the `mastodonAddress` is used as the name.
+     */
+    QString m_name;
+
+    /**
      * \brief The URL of the server
      *
      * We take the `host` and `port` components (if specified) for the
@@ -149,6 +184,16 @@ class Server
     QUrl m_url;
 
 };  // end Server class
+
+/**
+ * \brief A shared pointer to a Server object
+ */
+using ServerPtr = std::shared_ptr<Server>;
+
+/**
+ * \brief A shared pointer to a const Server object
+ */
+using ConstServerPtr = std::shared_ptr<const Server>;
 
 }}  // end TootDesk::Api namespace
 

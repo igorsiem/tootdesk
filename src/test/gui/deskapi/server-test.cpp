@@ -39,6 +39,13 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
     {
         REQUIRE(!tdapi::Server::isValid(""));
         REQUIRE(!server.isValid());
+
+        // Name (derived) is empty
+        REQUIRE(server.name().isEmpty());
+
+        // Can explicitly set a name, though.
+        server.setName("Example");
+        REQUIRE(server.name() == "Example");
     }   // end empty URL section
 
     // An invalid non-empty URL
@@ -48,6 +55,13 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
         REQUIRE(!tdapi::Server::isValid(url));
         server.setUrl(url);
         REQUIRE(!server.isValid());
+
+        // Name (derived) is empty
+        REQUIRE(server.name().isEmpty());
+
+        // Can explicitly set a name, though.
+        server.setName("Example");
+        REQUIRE(server.name() == "Example");
     }   // end invalid non-empty URL section
 
     // A valid URL with an invalid scheme
@@ -57,6 +71,13 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
         REQUIRE(!tdapi::Server::isValid(url));
         server.setUrl(url);
         REQUIRE(!server.isValid());
+
+        // Name (derived) is empty
+        REQUIRE(server.name().isEmpty());
+
+        // Can explicitly set a name, though.
+        server.setName("Example");
+        REQUIRE(server.name() == "Example");
     }   // end valid URL, invalid scheme section
 
     SECTION("valid mastodon Server URL")
@@ -69,6 +90,13 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
 
         // For the mastodon library, extract the host and port number
         REQUIRE(server.mastodonAddress() == "example.com:8080");
+
+        // Name has not been set, so the mastodon address is used.
+        REQUIRE(server.name().toStdString() == server.mastodonAddress());
+
+        // A name can be set explicitly
+        server.setName("Example");
+        REQUIRE(server.name() == "Example");
     }   // end valid Mastodon Server url section
 
 }   // end Server test

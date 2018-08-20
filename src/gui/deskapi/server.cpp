@@ -32,13 +32,17 @@
 
 namespace TootDesk { namespace Api {
 
-Server::Server(QUrl url) : m_url(std::move(url))
+Server::Server(QString name, QUrl url) :
+    m_name(std::move(name))
+    , m_url(std::move(url))
 {
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
         "is invalid";
 }   // end constructor
 
-Server::Server(QString url) : m_url(QUrl(std::move(url)))
+Server::Server(QString url) :
+    m_name()
+    , m_url(QUrl(std::move(url)))
 {
     if (!isValid()) qWarning() << "Server address" << url << "is invalid";
 }
@@ -59,6 +63,18 @@ bool Server::isValid(void) const
 {
     return isValid(m_url);
 }   // end isValid
+
+QString Server::name(void) const
+{
+    if (m_name.isEmpty())
+    {
+        if (isValid())
+            return QString::fromStdString(mastodonAddress());
+        else return "";
+    }
+
+    return m_name;
+}   // end name method
 
 void Server::setUrl(QUrl url)
 {
