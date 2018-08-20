@@ -16,21 +16,11 @@
 
 # Cmake file for specifying how the GUI executable is built
 
-# Run moc as needed
-set(CMAKE_AUTOMOC ON)
-
-# Tell Cmake where to find Qt stuff
-set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)
-message("CMAKE_PREFIX_PATH set to '${CMAKE_PREFIX_PATH}'")
-
-# Find QtWidgets
-find_package(Qt5Widgets)
-
 # Sort out the UI files and their generated headers
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 file(GLOB UI_FILES "*.ui")
 qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 
+# Specify composition of gui application
 file(GLOB_RECURSE GUI_SRC *.cpp *.rc *.qrc)
 add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
 

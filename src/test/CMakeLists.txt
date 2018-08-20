@@ -17,11 +17,17 @@
 # This cmake file specifies how to build the test-tootdesk executable
 
 file (GLOB_RECURSE TEST_SRC *.cpp)
-add_executable(test-tootdesk ${TEST_SRC})
+add_executable(test-tootdesk
+    ${TEST_SRC}
+    ../gui/deskapi/server.cpp
+)
 
-# TODO add target link libraries
+# Comment out these lines to alllow console debug / warning output in tests
+add_definitions(-DQT_NO_DEBUG_OUTPUT)
+add_definitions(-DQT_NO_WARNING_OUTPUT)
 
 target_link_libraries(test-tootdesk
+    Qt5::Widgets
     ${CURL_LIB}
     jsoncpp
     mastodon-cpp

@@ -87,7 +87,15 @@ class MainWindow : public QMainWindow
 
     // - Layout Stuff -
 
-    void setup(void);
+    /**
+     * \brief Top-level user interface setup
+     */
+    void setupUi(void);
+
+    /**
+     * \brief Set up the main widget of the window
+     */
+    void setupCentralWidget(void);
 
 ///    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
 

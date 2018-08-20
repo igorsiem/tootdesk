@@ -24,6 +24,7 @@
  */
 
 #include <QApplication>
+#include <QDebug>
 #include <QSettings>
 
 #include "mainwindow.h"
@@ -48,9 +49,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QSettings settings("Igor Siemienowicz", "TootDesk");
     MainWindow w(settings);
-///    w.showMaximized();
     w.show();
 
-    return a.exec();
+    auto result = a.exec();
+    qDebug() << __FUNCTION__ << "exiting with result" << result;
+    return result;
+    
 }   // end main function
 
