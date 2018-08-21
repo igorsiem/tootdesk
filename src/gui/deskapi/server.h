@@ -24,7 +24,12 @@
  */
 
 #include <memory>
+#include <map>
+
+#include <QMap>
+#include <QString>
 #include <QUrl>
+#include <QVariant>
 
 #ifndef _td_gui_deskapi_h_included
 #define _td_gui_deskapi_h_included
@@ -59,7 +64,16 @@ class Server
      *
      * \param url The URL of the server
      */
-    explicit Server(QString url = "");
+    explicit Server(QString url = "") : Server("", QUrl(url)) {}
+
+    /**
+     * \brief Initialise with two strings - name and URL
+     *
+     * \brief A human-readable name for the server instance
+     *
+     * \param url The URL of the Server (as a string)
+     */
+    Server(QString name, QString url) : Server(name, QUrl(url)) {}
 
     virtual ~Server(void) = default;    ///< Default destructor
 
@@ -194,6 +208,79 @@ using ServerPtr = std::shared_ptr<Server>;
  * \brief A shared pointer to a const Server object
  */
 using ConstServerPtr = std::shared_ptr<const Server>;
+
+/**
+ * \brief A std::map of shared pointers to `Server` objects, indexed by Name
+ */
+using ServerByNameMap = std::map<QString, ServerPtr>;
+
+/**
+ * \brief Convert a container of Server objects to a form that can be
+ * serialised by the Qt settings object
+ *
+ * \param servers The collection of Server objects
+ *
+ * \param serialisable The serialisable collection (a `QMap` of strings to
+ * variants) that will be filled with data; note that this is not emptied
+ * prior to adding data
+ *
+ * \return A reference to `serialisable`
+ *
+ * \throws TootDesk::Api::Error One of the Server objects was invalid
+ */
+extern QMap<QString, QVariant>& convertForSerialisation(
+    const ServerByNameMap& servers,
+    QMap<QString, QVariant>& serialisable);
+
+/**
+ * \brief Convert a container of Server objects to a form that can be
+ * serialised by the Qt settings object (using a temporary)
+ *
+ * \param servers The collection of Server objects
+ *
+ * \param serialisable The serialisable collection (a `QMap` of strings to
+ * variants) that will be filled with data; note that this is not emptied
+ * prior to adding data
+ *
+ * \return The serialisable collection (a `QMap` of strings to variants)
+ *
+ * \throws TootDesk::Api::Error One of the Server objects was invalid
+ */
+extern QMap<QString, QVariant> convertForSerialisation(
+    const ServerByNameMap& servers);
+
+/**
+ * \brief Convert a serialisable container to Server objects
+ *
+ * \param deserialised A `QMap` of strings to variants containing the Server
+ * data
+ *
+ * \param servers The container of Server objects to populate; note that this
+ * is not emptied prior to adding new data
+ *
+ * \return A reference to `servers`
+ *
+ * \throws TootDesk::Api::Error Invalid server data was encountered in the
+ * deserialised data
+ */
+extern ServerByNameMap& convertFromSerialisation(
+    const QMap<QString, QVariant>& deserialised,
+    ServerByNameMap& servers);
+
+/**
+ * \brief Convert a serialisable container to Server objects (using a
+ * temporary)
+ *
+ * \param deserialised A `QMap` of strings to variants containing the Server
+ * data
+ *
+ * \return The newly created Server objects
+ *
+ * \throws TootDesk::Api::Error Invalid server data was encountered in the
+ * deserialised data
+ */
+extern ServerByNameMap convertFromSerialisation(
+    const QMap<QString, QVariant>& deserialised);
 
 }}  // end TootDesk::Api namespace
 

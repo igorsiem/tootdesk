@@ -26,18 +26,18 @@
 #include <catch/catch.hpp>
 #include <gui/deskapi/deskapi.h>
 
-namespace tdapi = TootDesk::Api;
+namespace TdApi = TootDesk::Api;
 
 // Basic tests for the Server class
-TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
+TEST_CASE("TootDesk::Api::Server basic", "[unit][tdapi]")
 {
 
-    tdapi::Server server;
+    TdApi::Server server;
 
     // An empty server URL - invalid
     SECTION("empty URL")
     {
-        REQUIRE(!tdapi::Server::isValid(""));
+        REQUIRE(!TdApi::Server::isValid(""));
         REQUIRE(!server.isValid());
 
         // Name (derived) is empty
@@ -52,7 +52,7 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
     SECTION("invalid non-empty URL")
     {
         QString url = "xyz";
-        REQUIRE(!tdapi::Server::isValid(url));
+        REQUIRE(!TdApi::Server::isValid(url));
         server.setUrl(url);
         REQUIRE(!server.isValid());
 
@@ -68,7 +68,7 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
     SECTION("valid URL, invalid scheme")
     {
         QString url = "ftp://example.com";
-        REQUIRE(!tdapi::Server::isValid(url));
+        REQUIRE(!TdApi::Server::isValid(url));
         server.setUrl(url);
         REQUIRE(!server.isValid());
 
@@ -84,7 +84,7 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
     {
         // A valid URL for a server
         QString url = "http://example.com:8080";
-        REQUIRE(tdapi::Server::isValid(url));
+        REQUIRE(TdApi::Server::isValid(url));
         server.setUrl(url);
         REQUIRE(server.isValid());
 
@@ -99,4 +99,46 @@ TEST_CASE("TootDesk::Api::Server", "[unit][tdapi]")
         REQUIRE(server.name() == "Example");
     }   // end valid Mastodon Server url section
 
-}   // end Server test
+}   // end Server basic test
+
+// Verify Server object serialisation
+TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
+{
+    auto 
+        s1 = std::make_shared<TdApi::Server>("s1", "http://example1.com")
+        , s2 = std::make_shared<TdApi::Server>("s2", "https://example2.com")
+        , s3 = std::make_shared<TdApi::Server>("s3", "http://example3.com")
+        ;
+
+    TdApi::ServerByNameMap servers {
+        std::make_pair(s1->name(), s1)
+        , std::make_pair(s2->name(), s2)
+        , std::make_pair(s3->name(), s3)
+    };
+
+    QMap<QString, QVariant> serialisableServers =
+        convertForSerialisation(servers);
+
+    // We have 3 serialisable objects
+    REQUIRE(serialisableServers.size() == 3);
+
+    // Check server number 2
+    REQUIRE(serialisableServers["s2"].isValid());
+    REQUIRE(serialisableServers["s2"].toMap()["name"].toString() == "s2");
+    REQUIRE(serialisableServers["s2"].toMap()["url"].toUrl() ==
+        QUrl("https://example2.com"));
+
+
+    // Now, deserialise the servers into a new list.
+    TdApi::ServerByNameMap recoveredServers =
+        TdApi::convertFromSerialisation(serialisableServers);
+    
+    // We should have three recovered server objects (same as before).
+    REQUIRE(recoveredServers.size() == 3);
+
+    // Check the values of server 3.
+    REQUIRE(recoveredServers["s3"]->isValid());
+    REQUIRE(recoveredServers["s3"]->name() == "s3");
+    REQUIRE(recoveredServers["s3"]->url() == QUrl("http://example3.com"));
+
+}   // end Server serialisation test

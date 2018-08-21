@@ -40,13 +40,6 @@ Server::Server(QString name, QUrl url) :
         "is invalid";
 }   // end constructor
 
-Server::Server(QString url) :
-    m_name()
-    , m_url(QUrl(std::move(url)))
-{
-    if (!isValid()) qWarning() << "Server address" << url << "is invalid";
-}
-
 bool Server::isValid(const QUrl& url)
 {
     // First, check whether the URL is valid according to Qt's rules.
@@ -103,5 +96,77 @@ std::string Server::mastodonAddress(void) const
 
     return std::move(strm.str());
 }   // end mastodonAddress
+
+QMap<QString, QVariant>& convertForSerialisation(
+        const ServerByNameMap& servers,
+        QMap<QString, QVariant>& serialisable)
+{
+
+    for (auto itr : servers)
+    {
+
+        // Check for validity
+        if (itr.second->isValid() == false)
+            TD_RAISE_API_ERROR(
+                QObject::tr(
+                    "encountered invalid Server object while serialising"));
+
+        QVariant name(itr.second->name()), url(itr.second->url());
+
+        QMap<QString, QVariant> serverMap;
+        serverMap["name"] = name;
+        serverMap["url"] = url;
+
+        serialisable[itr.first] = serverMap;
+    }
+
+    return serialisable;
+}   // end convertForSerialisation function
+
+QMap<QString, QVariant> convertForSerialisation(
+        const ServerByNameMap& servers)
+{
+    QMap<QString, QVariant> serialisable;
+    convertForSerialisation(servers, serialisable);
+    return std::move(serialisable);
+}   // end convertForSerialisation function
+
+ServerByNameMap& convertFromSerialisation(
+        const QMap<QString, QVariant>& deserialised,
+        ServerByNameMap& servers)
+{
+    for (auto itr : deserialised)
+    {
+        if (itr.isValid() == false)
+            TD_RAISE_API_ERROR(
+                QObject::tr("invalid Server object encountered while "
+                    "deserialising"));
+
+        QMap<QString, QVariant> serverMap = itr.toMap();
+        auto newServer = std::make_shared<Server>(
+            serverMap["name"].toString(),
+            serverMap["url"].toUrl());
+
+        if (!newServer->isValid())
+            TD_RAISE_API_ERROR(
+                QObject::tr("invalid Server object encountered while "
+                    "deserialisaing; name \"") <<
+                    serverMap["name"].toString() <<
+                    QObject::tr("\"; URL \"") <<
+                    serverMap["url"].toString() << "\"");
+
+        servers[newServer->name()] = newServer;
+    }
+
+    return servers;
+}   // end convertFromSerialisation
+
+ServerByNameMap convertFromSerialisation(
+        const QMap<QString, QVariant>& deserialised)
+{
+    ServerByNameMap servers;
+    convertFromSerialisation(deserialised, servers);
+    return servers;
+}   // end convertFromSerialisation function
 
 }}  // end TootDesk::Api
