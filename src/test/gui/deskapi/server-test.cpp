@@ -128,7 +128,6 @@ TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
     REQUIRE(serialisableServers["s2"].toMap()["url"].toUrl() ==
         QUrl("https://example2.com"));
 
-
     // Now, deserialise the servers into a new list.
     TdApi::ServerByNameMap recoveredServers =
         TdApi::convertFromSerialisation(serialisableServers);

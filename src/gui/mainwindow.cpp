@@ -29,11 +29,15 @@
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
-///#include <QLineEdit>
-///#include <QMessageBox>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QSplitter>
+#include <QTableView>
 ///#include <QThreadPool>
 ///#include <QVBoxLayout>
+
+#include <deskgui/deskgui.h>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -43,12 +47,20 @@
 ///#include "statuswidget.h"
 ///#include "timelinewidget.h"
 
+namespace TdGui = Td::Gui;
+
 MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
     QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_settings(settings)
+    , m_servers()
 ///    , m_timelineWidget(nullptr)
 {
+
+    // Retrieve servers info from persistent settings
+    auto serverVar = m_settings.value("servers");
+    if (serverVar.isValid())
+        TdApi::convertFromSerialisation(serverVar.toMap(), m_servers);
 
     setupUi();
 
@@ -102,12 +114,12 @@ void MainWindow::setupCentralWidget(void)
     auto mainSplitter = new QSplitter(this);
     ui->centralWidget->layout()->addWidget(mainSplitter);
 
-    auto leftFrame = new QFrame(this), rightFrame = new QFrame(this);
+    // Set up the left and right halves of the splitter
+    mainSplitter->addWidget(setupLeftSplit(mainSplitter));
 
-    leftFrame->setFrameShape(QFrame::StyledPanel);
+    // TODO set up a proper right side of the window
+    auto rightFrame = new QFrame(this);
     rightFrame->setFrameShape(QFrame::StyledPanel);
-
-    mainSplitter->addWidget(leftFrame);
     mainSplitter->addWidget(rightFrame);
 
     // Set up the geometry of the main splitter - getting it from persistent
@@ -139,8 +151,40 @@ void MainWindow::setupCentralWidget(void)
 ///
 ///    auto tf2 = createColumnFrame(ui->centralWidget);
 ///    ui->centralWidget->layout()->addWidget(tf2);
-///
+
 }   // end setupCentralWidget method
+
+QWidget* MainWindow::setupLeftSplit(QWidget* parent)
+{
+
+    // Create the frame for the view
+    auto frame = new QFrame(parent);
+    frame->setLayout(new QVBoxLayout(frame));
+    frame->setFrameShape(QFrame::StyledPanel);
+
+    // Add a widget for the Server instances table
+    //
+    // TODO Consider whether we want to display the server instances all the
+    // the time
+    auto serversWidget = new TdGui::ServersWidget(m_servers, frame);
+
+    // When the servers Widget updates the list of Servers, make sure the
+    // info is written to persistent settings.
+    connect(
+        serversWidget,
+        &TdGui::ServersWidget::serversCollectionChanged,
+        [this](void)
+        {
+            auto serialisableServerInfo =
+                TdApi::convertForSerialisation(m_servers);
+            m_settings.setValue("servers", serialisableServerInfo);
+        });
+
+    frame->layout()->addWidget(serversWidget);
+
+    return frame;
+
+}   // end setupLeftSplit
 
 ///QFrame* MainWindow::createTimelineFrame(
 ///        const QString& title,

@@ -36,6 +36,9 @@
  * 
  * \todo This is just a barebones display of status text items - needs lots
  * of layout work
+ *
+ * \todo Consider deprecating / removing this widget in favour of a Model /
+ * View set of classes
  */
 class StatusWidget : public QWidget
 {

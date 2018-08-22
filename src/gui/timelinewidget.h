@@ -38,6 +38,9 @@
  * \param Add additional options for ordering / filtering
  * 
  * \param Expand this documentation
+ *
+ * \todo Consider deprecating / removing this class in favour of a Model /
+ * View design
  */
 class TimelineWidget : public QListWidget
 {

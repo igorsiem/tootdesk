@@ -31,6 +31,9 @@
 ///#include <QPushButton>
 ///#include <mastodon-cpp/mastodon-cpp.hpp>
 ///#include <mastodon-cpp/easy/all.hpp>
+
+#include "deskapi/deskapi.h"
+
 ///#include "timelinewidget.h"
 
 #ifndef _td_gui_mainwindow_h_included
@@ -39,6 +42,9 @@
 namespace Ui {
 class MainWindow;
 }
+
+namespace Td = TootDesk;
+namespace TdApi = Td::Api;
 
 /**
  * \brief Encapsulates the main GUI window
@@ -97,12 +103,32 @@ class MainWindow : public QMainWindow
      */
     void setupCentralWidget(void);
 
+    /**
+     * \brief Set up the widget for the 'left half' of the main splitter
+     *
+     * \param parent The widget to use for for the parent (owns the new
+     * widget)
+     *
+     * \return The widget for the left split
+     */
+    QWidget* setupLeftSplit(QWidget* parent);
+
+    /**
+     * \brief Create a widget containing a table view of the Servers
+     * collection
+     *
+     * \param parent Widget to use for the parent (owns the new widget) 
+     *
+     * \return The new widget containing Servers table
+     */
+    QWidget* createServersTableWidget(QWidget* parent);
+
 ///    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
 
 ///    static QFrame* createColumnFrame(QWidget* parent);
 
-    // - Event Handlers -
-
+    // - Event Handling -
+  
     signals:
 
 ///    void statusDecoded(ConstStatusPtr status);
@@ -130,6 +156,11 @@ class MainWindow : public QMainWindow
      * such as window geometry
      */
     QSettings& m_settings;
+
+    /**
+     * \brief The collection of Server instances
+     */
+    TdApi::ServerByNameMap m_servers;
 
 ///    TimelineWidget* m_timelineWidget;
 
