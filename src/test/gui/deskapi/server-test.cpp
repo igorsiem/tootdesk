@@ -37,7 +37,7 @@ TEST_CASE("TootDesk::Api::Server basic", "[unit][tdapi]")
     // An empty server URL - invalid
     SECTION("empty URL")
     {
-        REQUIRE(!TdApi::Server::isValid(""));
+        REQUIRE(!TdApi::Server::isValidUrl(""));
         REQUIRE(!server.isValid());
 
         // Name (derived) is empty

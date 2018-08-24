@@ -108,9 +108,17 @@ class ServerTableModel : public QAbstractTableModel
         Qt::Orientation orientation,
         int role = Qt::DisplayRole) const override;
 
-    void beginServerCollectionChanged(void) { beginResetModel(); }
+    /**
+     * \brief Signal that the external collection of Server instance objects
+     * will change
+     */
+    void beginServerCollectionChange(void) { beginResetModel(); }
     
-    void endServerCollectionChanged(void) { endResetModel(); }
+    /**
+     * \brief Signal that the external collection of Server instance objects
+     * has finished changing
+     */
+    void endServerCollectionChange(void) { endResetModel(); }
 
 
     // --- Internal Declarations ---

@@ -27,9 +27,11 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTableView>
+#include <QToolBar>
 #include <QVBoxLayout>
 
 #include "errorhandling.h"
+#include "serverdialog.h"
 #include "serverswidget.h"
 
 namespace TootDesk { namespace Gui {
@@ -39,6 +41,7 @@ ServersWidget::ServersWidget(
         QWidget* parent) :
     QWidget(parent)
     , m_servers(servers)
+    , m_serverTableView(nullptr)
     , m_serverTableModel(nullptr)
 {
 
@@ -49,49 +52,201 @@ ServersWidget::ServersWidget(
     // A simple label to say what we are
     layout()->addWidget(new QLabel(tr("Server instances"), parent));
 
-    // The table view and model - the model wraps our reference to the
-    // Servers container
-    auto serverTableView = new QTableView(this);
-    layout()->addWidget(serverTableView);
+    // The table view, data model and selection model - the model wraps our
+    // reference to the Servers container
+    m_serverTableView = new QTableView(this);
+    layout()->addWidget(m_serverTableView);
     m_serverTableModel =
-        new Gui::ServerTableModel(m_servers, serverTableView);
-    serverTableView->setModel(m_serverTableModel);
+        new Gui::ServerTableModel(m_servers, m_serverTableView);
+    m_serverTableView->setModel(m_serverTableModel);
+    m_serverTableView->setSelectionModel(
+        new QItemSelectionModel(m_serverTableModel));
+    m_serverTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_serverTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    // Create an add / edit section at the bottom of the table
-    auto editingWidget = new QWidget(this);
-    layout()->addWidget(editingWidget);
-    auto editingLayout = new QGridLayout(editingWidget);
-    editingWidget->setLayout(editingLayout);
-    editingLayout->setContentsMargins(0, 0, 0, 0);
+    m_serverTableView->selectRow(0);
 
-    // Editing section has a name, address and a button that says either
-    // 'Add' or 'Update', depending on what we're doing
-    editingLayout->addWidget(new QLabel(tr("Name"), editingWidget), 0, 0);
-    editingLayout->addWidget(new QLabel(tr("Address"), editingWidget), 0, 1);
+    // Put a toolbar at the bottom of the widget for editing functions.
+    auto toolBar = new QToolBar(this);
+    layout()->addWidget(toolBar);
 
-    auto nameLineEdit = new QLineEdit(editingWidget)
-        , addressLineEdit = new QLineEdit(editingWidget);
-
-    editingLayout->addWidget(nameLineEdit, 1, 0);
-    editingLayout->addWidget(addressLineEdit, 1, 1);
-
-    auto editingButton = new QPushButton(tr("Add"), editingWidget);
-
-    connect(
-        editingButton,
-        &QPushButton::clicked,
-        [this, nameLineEdit, addressLineEdit](bool)
+    // Action for creating a new Server object
+    toolBar->addAction(
+        tr("New Server"),
+        [this](void)
         {
             TD_ACTION_TRY
             {
-                // Add a new Server from the edit items
-                //
-                // TODO expand to work with updates as well
-                addNewServer(nameLineEdit->text(), addressLineEdit->text());
+
+                // Execute the Server Dialog, with a validation function that
+                // checks the URL, and that there are no duplicate names.
+                auto newServerData = ServerDialog::execute(
+                    ServerDialog::DialogData(),
+                    [this](const ServerDialog::DialogData& data) ->
+                            boost::optional<QString>
+                    {
+                        // Make sure it is not a duplicate name
+                        if (m_servers.find(std::get<0>(data)) !=
+                                m_servers.end())
+                            return tr("A Server with this name already "
+                                "exists");
+
+                        // Make sure the URL is legit
+                        if (!Api::Server::isValid(std::get<1>(data)))
+                            return tr("The Server URL is not valid");
+
+                        return boost::none;
+                    },
+                    tr("New Server"),
+                    this);
+
+                // If we got a result, then legit data was entered and
+                // accepted.
+                if (newServerData)
+                    addNewServer(
+                        std::get<0>(*newServerData),
+                        std::get<1>(*newServerData));
+
             }
-            TD_ACTION_CATCH_ALL_FROM("Adding something")
+            TD_ACTION_CATCH_ALL_FROM(tr("New Server"))
         });
-    editingLayout->addWidget(editingButton, 1, 2);
+
+    // Lambda for editing the selected Server
+    auto editServerFn = 
+        [this](void)
+        {
+            TD_ACTION_TRY
+            {
+
+                // Get the index of the selected row in the table
+                auto selRows =
+                    m_serverTableView->selectionModel()->selectedRows();
+                if (selRows.size() == 0) return;
+
+                int selRow = selRows[0].row();
+
+                // Get the Server object by iterating through its list
+                // (inefficient, but number of Servers is 'small').
+                auto serverItr = m_servers.begin();
+                for (int i = 0; i < selRow; i++) serverItr++;
+
+                auto selectedServer = serverItr->second;
+
+                ServerDialog::DialogData
+                    dataToEdit(
+                        selectedServer->name(),
+                        selectedServer->url().toString());
+
+                QString oldName = selectedServer->name();
+
+                // Execute the Server Dialog, with a validation function that
+                // checks the URL, and that there are no duplicate names
+                // but allows the existing name to be retained
+                auto newServerData = ServerDialog::execute(
+                    dataToEdit,
+                    [this,&oldName](const ServerDialog::DialogData& data) ->
+                            boost::optional<QString>
+                    {
+                        if (std::get<0>(data) != oldName)
+                        {
+                            if (m_servers.find(std::get<0>(data)) !=
+                                    m_servers.end())
+                                return tr("A Server with this name already "
+                                    "exists");
+                        }
+
+                        // Make sure the URL is legit
+                        if (!Api::Server::isValid(std::get<1>(data)))
+                            return tr("The Server URL is not valid");
+
+                        return boost::none;
+                    },
+                    tr("New Server"),
+                    this);        
+
+                // If we got legit new data, update the servers list.
+                if (newServerData)
+                {
+                    QString newName = std::get<0>(*newServerData),
+                        newUrl = std::get<1>(*newServerData);
+
+                    // Make sure the new URL begins with HTTP or HTTPS
+                    if (
+                            (!newUrl.startsWith(
+                                "http://",
+                                Qt::CaseInsensitive))
+                            && (!newUrl.startsWith(
+                                "https://",
+                                Qt::CaseInsensitive)))
+                        newUrl = QString("http://") + newUrl;
+
+                    // Remove the Server object from the collection, update
+                    // its data, and then reinsert.
+                    m_serverTableModel->beginServerCollectionChange();
+                    m_servers.erase(serverItr);
+                    selectedServer->setName(newName);
+                    selectedServer->setUrl(QUrl(newUrl));
+                    m_servers[newName] = selectedServer;
+                    m_serverTableModel->endServerCollectionChange();
+
+                    emit serversCollectionChanged();
+                }   // end if we have some new server data
+
+            }
+            TD_ACTION_CATCH_ALL_FROM(tr("Edit Server"))
+        };
+
+    // Attach editing function from both the button and the table
+    // double-click
+    toolBar->addAction(
+        tr("Edit Server"),
+        editServerFn);
+
+    connect(
+        m_serverTableView,
+        &QTableView::doubleClicked,
+        editServerFn);
+
+    // Action for deleting the selected Server
+    toolBar->addAction(
+        tr("Delete Server"),
+        [this](void)
+        {
+            TD_ACTION_TRY
+            {
+                // Get the index of the selected row in the table
+                auto selRows =
+                    m_serverTableView->selectionModel()->selectedRows();
+                if (selRows.size() == 0) return;
+
+                int selRow = selRows[0].row();
+
+                // Get the Server object by iterating through its list
+                // (inefficient, but number of Servers is 'small').
+                auto serverItr = m_servers.begin();
+                for (int i = 0; i < selRow; i++) serverItr++;
+
+                auto selectedServer = serverItr->second;
+
+                // Get user confirmation
+                if (QMessageBox::question(
+                            this,
+                            tr("Delete Server"),
+                            tr("Please confirm deletion of Server \"") +
+                                selectedServer->name() + QString("\""),
+                            QMessageBox::Ok | QMessageBox::Cancel) ==
+                        QMessageBox::Ok)
+                {
+                    // User has confirmed - execute deletion and notification
+                    m_serverTableModel->beginServerCollectionChange();
+                    m_servers.erase(serverItr);
+                    m_serverTableModel->endServerCollectionChange();
+
+                    emit serversCollectionChanged();
+                }
+            }
+            TD_ACTION_CATCH_ALL_FROM(tr("Delete Server"))
+        });
 
 }   // end constructor
 
@@ -99,30 +254,19 @@ void ServersWidget::addNewServer(QString name, QString url)
 {
     // Make sure the URL begins with http or https.
     QString _url = url;
-    if ((!_url.startsWith("http://")) && (!_url.startsWith("https://")))
+    if ((!_url.startsWith("http://", Qt::CaseInsensitive))
+            && (!_url.startsWith("https://", Qt::CaseInsensitive)))
         _url = QString("http://") + _url;
 
-    // Check to see if the URL is valid
-    if (!Api::Server::isValid(_url))
-        TD_RAISE_API_ERROR(tr("invalid url for Server Instance: ") << _url);
-
-    // Create the Server object
+    // Create the Server object - we've already checked for validity and
+    // duplicate names - and add it to the servers collection
     auto newServer = std::make_shared<Api::Server>(name,  _url);
 
-    // Check that we don't already have a server with the same name. We use
-    // the Server object for this, because the derived Server object name
-    // may be different from the `name` parameter
-    if (m_servers.find(newServer->name()) == m_servers.end())
-    {
-        m_serverTableModel->beginServerCollectionChanged();
-        m_servers[newServer->name()] = newServer;
-        m_serverTableModel->endServerCollectionChanged();
-    }
-    else TD_RAISE_API_ERROR(
-        tr("a Server instance with this name already exists: ") <<
-        newServer->name());
-
-     emit serversCollectionChanged();   
+    m_serverTableModel->beginServerCollectionChange();
+    m_servers[newServer->name()] = newServer;
+    m_serverTableModel->endServerCollectionChange();
+    
+     emit serversCollectionChanged();
 }   // end addNewServer method
 
 }}  // end TootDesk::Gui namespace

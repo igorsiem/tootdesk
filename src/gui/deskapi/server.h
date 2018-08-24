@@ -107,7 +107,7 @@ class Server
      *
      * \return `true` if the URL is valid
      */
-    static bool isValid(const QString& url) { return isValid(QUrl(url)); }
+    static bool isValidUrl(const QString& url) { return isValid(QUrl(url)); }
 
     /**
      * \brief Determines whether or not the Server is valid for use.

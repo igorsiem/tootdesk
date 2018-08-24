@@ -23,7 +23,11 @@
  * \copyright GPL 3.0
  */
 
+#include <QDebug>
+#include <QItemSelectionModel>
+#include <QResizeEvent>
 #include <QSettings>
+#include <QTableView>
 #include <QWidget>
 
 #include "../deskapi/server.h"
@@ -67,7 +71,37 @@ class ServersWidget : public QWidget
 
     protected:
 
+    /**
+     * \brief Set table column widths when the widget is resized
+     *
+     * This method is called in response to a standard widget resize event.
+     * It sets the widthds of the two data columns to half of the table
+     * width.
+     *
+     * \todo This is a fairly 'brittle' method, in that it assumes that there
+     * all the columns need to be of equal width. Consider an algorithm that
+     * allows (and persists) column resizing, and maintains the relative
+     * sizes of all columns.
+     */
+    virtual void resizeEvent(QResizeEvent* e) override
+    {
+        if (m_serverTableView)
+        {
+            auto numCols = m_serverTableModel->columnCount();
+
+            for (int i = 0; i < numCols; i++)
+                m_serverTableView->setColumnWidth(
+                    i, (m_serverTableView->width() / numCols) - 1);
+        }
+
+        QWidget::resizeEvent(e);
+    }   // end resizeEvent method
+
+    // -- Helper Functions --
+
     void addNewServer(QString name, QString url);
+
+    // -- Attributes --
 
     /**
      * \brief The external collection of Server instance objects, maintained
@@ -76,6 +110,11 @@ class ServersWidget : public QWidget
      * When this is updated, the collection is rewritten to `m_settings`.
      */
     Api::ServerByNameMap& m_servers;
+
+    /**
+     * \brief The view object for displaying Server instances in a table
+     */
+    QTableView* m_serverTableView;
 
     /**
      * \brief Data model for mediating between the `m_servers` collection and
