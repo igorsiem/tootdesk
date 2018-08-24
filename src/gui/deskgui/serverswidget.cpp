@@ -161,7 +161,7 @@ ServersWidget::ServersWidget(
 
                         return boost::none;
                     },
-                    tr("New Server"),
+                    tr("Edit Server"),
                     this);        
 
                 // If we got legit new data, update the servers list.

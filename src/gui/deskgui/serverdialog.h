@@ -169,6 +169,11 @@ class ServerDialog : public QDialog
 
         layout->addRow(buttonBox);
 
+        // Disable resizing
+        adjustSize();
+        setSizeGripEnabled(false);
+        setFixedSize(size());
+
     }   // end constructor
 
     /**
