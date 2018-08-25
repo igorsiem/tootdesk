@@ -56,10 +56,10 @@ QVariant ServerTableModel::data(
 
     switch (index.column())
     {
-        case 0: return serverItr->second->name();
+        case 0: return serverItr.value()->name();
         case 1:
             return QString::fromStdString(
-                serverItr->second->mastodonAddress());
+                serverItr.value()->mastodonAddress());
         default: return QVariant();
     }
 }   // end data method

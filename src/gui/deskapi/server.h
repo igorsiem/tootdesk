@@ -23,27 +23,32 @@
  * \copyright GPL 3.0
  */
 
-#include <memory>
-#include <map>
-
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QUrl>
 #include <QVariant>
 
-#ifndef _td_gui_server_h_included
-#define _td_gui_server_h_included
+#include "coretypes.h"
+
+#ifndef _td_gui_deskapi_server_h_included
+#define _td_gui_deskapi_server_h_included
 
 namespace TootDesk { namespace Api {
 
 /**
  * \brief Encapsulates a Mastodon server instance that can be queried for
  * status items (Toots)
+ * 
+ * This class implements a Qt-style interace for the `Mastodon::Easy::Easy`
+ * and `Mastodon::Easy::Instance` classes.
  *
  * \todo Expand this doco
  */
-class Server
+class Server : public QObject
 {
+
+    Q_OBJECT
 
     // --- Public Interface ---
 
@@ -57,8 +62,10 @@ class Server
      * \brief A human-readable name for the server instance
      *
      * \param url The URL of the Server
+     * 
+     * \param parent The parent (owner) of the object in the hierarchy
      */
-    Server(QString name, QUrl url);
+    Server(QString name, QUrl url, QObject* parent = nullptr);
 
     /**
      * \brief Initialise with a string URL
@@ -211,17 +218,17 @@ class Server
 /**
  * \brief A shared pointer to a Server object
  */
-using ServerPtr = std::shared_ptr<Server>;
+using ServerPtr = SharedPtr<Server>;
 
 /**
  * \brief A shared pointer to a const Server object
  */
-using ConstServerPtr = std::shared_ptr<const Server>;
+using ConstServerPtr = SharedPtr<const Server>;
 
 /**
  * \brief A std::map of shared pointers to `Server` objects, indexed by Name
  */
-using ServerByNameMap = std::map<QString, ServerPtr>;
+using ServerByNameMap = QMap<QString, ServerPtr>;
 
 /**
  * \brief Convert a container of Server objects to a form that can be

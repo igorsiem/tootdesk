@@ -32,8 +32,9 @@
 
 namespace TootDesk { namespace Api {
 
-Server::Server(QString name, QUrl url) :
-    m_name(std::move(name))
+Server::Server(QString name, QUrl url, QObject* parent) :
+    QObject(parent)
+    , m_name(std::move(name))
     , m_url(std::move(url))
 {
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
@@ -102,22 +103,23 @@ QMap<QString, QVariant>& convertForSerialisation(
         QMap<QString, QVariant>& serialisable)
 {
 
-    for (auto itr : servers)
+///    for (auto itr : servers)
+    for (auto itr = servers.begin(); itr != servers.end(); ++itr)
     {
 
         // Check for validity
-        if (itr.second->isValid() == false)
+        if (itr.value()->isValid() == false)
             TD_RAISE_API_ERROR(
                 QObject::tr(
                     "encountered invalid Server object while serialising"));
 
-        QVariant name(itr.second->name()), url(itr.second->url());
+        QVariant name(itr.value()->name()), url(itr.value()->url());
 
         QMap<QString, QVariant> serverMap;
         serverMap["name"] = name;
         serverMap["url"] = url;
 
-        serialisable[itr.first] = serverMap;
+        serialisable[itr.key()] = serverMap;
     }
 
     return serialisable;
@@ -143,7 +145,7 @@ ServerByNameMap& convertFromSerialisation(
                     "deserialising"));
 
         QMap<QString, QVariant> serverMap = itr.toMap();
-        auto newServer = std::make_shared<Server>(
+        auto newServer = Api::makeShared<Server>(
             serverMap["name"].toString(),
             serverMap["url"].toUrl());
 

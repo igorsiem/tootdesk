@@ -105,16 +105,15 @@ TEST_CASE("TootDesk::Api::Server basic", "[unit][tdapi]")
 TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
 {
     auto 
-        s1 = std::make_shared<TdApi::Server>("s1", "http://example1.com")
-        , s2 = std::make_shared<TdApi::Server>("s2", "https://example2.com")
-        , s3 = std::make_shared<TdApi::Server>("s3", "http://example3.com")
+        s1 = TdApi::makeShared<TdApi::Server>("s1", "http://example1.com")
+        , s2 = TdApi::makeShared<TdApi::Server>("s2", "https://example2.com")
+        , s3 = TdApi::makeShared<TdApi::Server>("s3", "http://example3.com")
         ;
 
-    TdApi::ServerByNameMap servers {
-        std::make_pair(s1->name(), s1)
-        , std::make_pair(s2->name(), s2)
-        , std::make_pair(s3->name(), s3)
-    };
+    TdApi::ServerByNameMap servers;
+    servers[s1->name()] = s1;
+    servers[s2->name()] = s2;
+    servers[s3->name()] = s3;
 
     QMap<QString, QVariant> serialisableServers =
         convertForSerialisation(servers);

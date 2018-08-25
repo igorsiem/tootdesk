@@ -130,7 +130,7 @@ ServersWidget::ServersWidget(
                 auto serverItr = m_servers.begin();
                 for (int i = 0; i < selRow; i++) serverItr++;
 
-                auto selectedServer = serverItr->second;
+                auto selectedServer = serverItr.value();
 
                 ServerDialog::DialogData
                     dataToEdit(
@@ -226,7 +226,7 @@ ServersWidget::ServersWidget(
                 auto serverItr = m_servers.begin();
                 for (int i = 0; i < selRow; i++) serverItr++;
 
-                auto selectedServer = serverItr->second;
+                auto selectedServer = serverItr.value();
 
                 // Get user confirmation
                 if (QMessageBox::question(
@@ -260,7 +260,8 @@ void ServersWidget::addNewServer(QString name, QString url)
 
     // Create the Server object - we've already checked for validity and
     // duplicate names - and add it to the servers collection
-    auto newServer = std::make_shared<Api::Server>(name,  _url);
+///    auto newServer = std::make_shared<Api::Server>(name,  _url);
+    auto newServer = Api::makeShared<Api::Server>(name, _url);
 
     m_serverTableModel->beginServerCollectionChange();
     m_servers[newServer->name()] = newServer;
