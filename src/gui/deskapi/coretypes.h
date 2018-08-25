@@ -32,18 +32,54 @@
  * \copyright GPL 3.0
  */
 
+#include <QMutex>
+#include <QReadLocker>
+#include <QReadWriteLock>
 #include <QSharedPointer>
+#include <QWriteLocker>
 
 #ifndef _td_gui_deskapi_coretypes_h_included
 #define _td_gui_deskapi_coretypes_h_included
 
 namespace TootDesk { namespace Api {
 
+/**
+ * \brief The shared pointer type used by the TootDesk API
+ * 
+ * \tparam T The type of the shared object
+ */
 template <typename T>
 using SharedPtr = QSharedPointer<T>;
 
+/**
+ * \brief Create a new object as a shared pointer
+ * 
+ * \tparam T The type of the shared object
+ * 
+ * \tparam Args The argument types of the constructor
+ * 
+ * \param args The constructor arguments for the new object
+ */
 template <typename T, typename... Args>
 auto makeShared(Args... args) { return SharedPtr<T>::create(args...); }
+
+/**
+ * \brief The mutex type used by the TD API
+ * 
+ * In this implementation, we use Qt's `QReadWriteLock`, which is roughly
+ * equivalent to a `std::shared_mutex`.
+ */
+using Mutex = QReadWriteLock;
+
+/**
+ * \brief Mechanism for a non-exclusive lock on a mutex
+ */
+using ReadGuard = QReadLocker;
+
+/**
+ * \brief Mechanism for an exclusive lock on a mutex
+ */
+using WriteGuard = QWriteLocker;
 
 }}  // end TootDesk::Api namespace
 

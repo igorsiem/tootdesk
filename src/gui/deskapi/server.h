@@ -199,6 +199,11 @@ class Server : public QObject
     protected:
 
     /**
+     * \brief MT synchronised access to the internals of a Server object
+     */
+    mutable Mutex m_mtx;
+
+    /**
      * \brief Human-readable name for the Instance
      *
      * This may be empty. If so, the `mastodonAddress` is used as the name.

@@ -34,6 +34,7 @@ namespace TootDesk { namespace Api {
 
 Server::Server(QString name, QUrl url, QObject* parent) :
     QObject(parent)
+    , m_mtx()
     , m_name(std::move(name))
     , m_url(std::move(url))
 {
@@ -55,11 +56,14 @@ bool Server::isValid(const QUrl& url)
 
 bool Server::isValid(void) const
 {
+    ReadGuard grd(&m_mtx);
     return isValid(m_url);
 }   // end isValid
 
 QString Server::name(void) const
 {
+    ReadGuard grd(&m_mtx);
+
     if (m_name.isEmpty())
     {
         if (isValid())
@@ -72,14 +76,18 @@ QString Server::name(void) const
 
 void Server::setUrl(QUrl url)
 {
+    WriteGuard grd(&m_mtx);
     m_url = std::move(url);
+    grd.unlock();
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
         "is invalid";
 }   // end setUrl method
 
 void Server::setUrl(QString url)
 {
+    WriteGuard grd(&m_mtx);
     m_url = QUrl(std::move(url));
+    grd.unlock();
     if (!isValid()) qWarning() << "Server address" << url << "is invalid";
 }   // end setUrl
 
@@ -89,6 +97,7 @@ std::string Server::mastodonAddress(void) const
         TD_RAISE_API_ERROR(QObject::tr("server address not valid: ") <<
             m_url.toString());
 
+    ReadGuard grd(&m_mtx);
     std::stringstream strm;
     strm << m_url.host().toStdString();
 
@@ -103,7 +112,6 @@ QMap<QString, QVariant>& convertForSerialisation(
         QMap<QString, QVariant>& serialisable)
 {
 
-///    for (auto itr : servers)
     for (auto itr = servers.begin(); itr != servers.end(); ++itr)
     {
 
