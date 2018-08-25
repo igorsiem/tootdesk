@@ -26,8 +26,10 @@
 #include <functional>
 #include <QRunnable>
 
-#ifndef _td_gui_lambdarunnable_h_included
-#define _td_gui_lambdarunnable_h_included
+#ifndef _td_gui_deskapi_lambdarunnable_h_included
+#define _td_gui_deskapi_lambdarunnable_h_included
+
+namespace TootDesk { namespace Api {
 
 /**
  * \brief An implementation of QRunnable that runs an ordinary C++ lambda
@@ -75,6 +77,8 @@ class LambdaRunnable : public QRunnable
      */
     RunFn m_runFn;
 
-};  // end LambdaRunnable
+};  // end LambdaRunnable class
+
+}}  // end TootDesk::Api namespace
 
 #endif

@@ -24,10 +24,11 @@
  */
 
 #include "error.h"
+#include "lambdarunnable.h"
 #include "server.h"
 
-#ifndef _td_gui_deskapi_h_included
-#define _td_gui_deskapi_h_included
+#ifndef _td_gui_deskapi_deskapi_h_included
+#define _td_gui_deskapi_deskapi_h_included
 
 /**
  * \brief Namespace for declarations that are specific to TootDesk

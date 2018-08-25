@@ -27,10 +27,12 @@
 #include <mastodon-cpp/mastodon-cpp.hpp>
 #include <mastodon-cpp/easy/all.hpp>
 
+// #include <iostream>
+
 using Mastodon::Easy;
 
 // This is a really basic test to verify that Mastodon-CPP can go online and
-// get some statuses
+// get some statuses and other info.
 TEST_CASE("mastodon-cpp", "[third-party][online]")
 {
    
@@ -38,5 +40,13 @@ TEST_CASE("mastodon-cpp", "[third-party][online]")
     std::string answer;
     REQUIRE_NOTHROW(masto.get(Mastodon::API::v1::timelines_public, answer));
     REQUIRE(answer.empty() == false);
+
+    REQUIRE_NOTHROW(masto.get(Mastodon::API::v1::instance, answer));
+    Easy::Instance ins(answer);
+
+    // std::cout
+    //     << std::endl << "[DEBUG] title:       " << ins.title()
+    //     << std::endl << "[DEBUG] description: " << ins.description()
+    //     << std::endl;
 
 }   // end mastodon-cpp test

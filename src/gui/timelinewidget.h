@@ -29,58 +29,58 @@
 #ifndef _td_gui_timelinewidget_h_included
 #define _td_gui_timelinewidget_h_included
 
-/**
- * \brief A widget for displaying statuses (stati?) in a vertical 'timeline'
- * format
- * 
- * \todo Add a `clear` method for emptying the timeline
- * 
- * \param Add additional options for ordering / filtering
- * 
- * \param Expand this documentation
- *
- * \todo Consider deprecating / removing this class in favour of a Model /
- * View design
- */
-class TimelineWidget : public QListWidget
-{
-
-    Q_OBJECT
-
-    // --- External Interface ---
-
-    public:
-
-    // -- Construction / Destruction --
-
-    explicit TimelineWidget(QWidget* parent);
-
-    /**
-     * \brief Trivial destructor
-     */
-    virtual ~TimelineWidget(void) {}
-
-    // -- Status Item Management --
-
-    public slots:
-
-    /**
-     * \brief Add a new status item to the displayed timeline
-     * 
-     * This method creates a new StatusWidget object from the given status,
-     * and places it in the displayed timeline.
-     * 
-     * \param status The Mastodon status item
-     */
-    void add(ConstStatusPtr status);
-
-    // --- Internal Declarations ---
-
-    protected:
-
-    // -- Helper Methods --
-
-    
-};  // end TimelineWidget class
+////**
+/// * \brief A widget for displaying statuses (stati?) in a vertical 'timeline'
+/// * format
+/// * 
+/// * \todo Add a `clear` method for emptying the timeline
+/// * 
+/// * \param Add additional options for ordering / filtering
+/// * 
+/// * \param Expand this documentation
+/// *
+/// * \todo Consider deprecating / removing this class in favour of a Model /
+/// * View design
+/// */
+///class TimelineWidget : public QListWidget
+///{
+///
+///    Q_OBJECT
+///
+///    // --- External Interface ---
+///
+///    public:
+///
+///    // -- Construction / Destruction --
+///
+///    explicit TimelineWidget(QWidget* parent);
+///
+///    /**
+///     * \brief Trivial destructor
+///     */
+///    virtual ~TimelineWidget(void) {}
+///
+///    // -- Status Item Management --
+///
+///    public slots:
+///
+///    /**
+///     * \brief Add a new status item to the displayed timeline
+///     * 
+///     * This method creates a new StatusWidget object from the given status,
+///     * and places it in the displayed timeline.
+///     * 
+///     * \param status The Mastodon status item
+///     */
+///    void add(ConstStatusPtr status);
+///
+///    // --- Internal Declarations ---
+///
+///    protected:
+///
+///    // -- Helper Methods --
+///
+///    
+///};  // end TimelineWidget class
 
 #endif

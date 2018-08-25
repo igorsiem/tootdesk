@@ -48,8 +48,8 @@ using StatusPtr = std::shared_ptr<status_t>;
  */
 using ConstStatusPtr = std::shared_ptr<const status_t>;
 
-// Set up Qt metatypes for a status pointer
-Q_DECLARE_METATYPE(StatusPtr);
-Q_DECLARE_METATYPE(ConstStatusPtr);
+///// Set up Qt metatypes for a status pointer
+///Q_DECLARE_METATYPE(StatusPtr);
+///Q_DECLARE_METATYPE(ConstStatusPtr);
 
 #endif

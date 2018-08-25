@@ -29,36 +29,36 @@
 
 #include "statuswidget.h"
 
-StatusWidget::StatusWidget(
-        const status_t& status,
-        QWidget* parent) :
-    QWidget(parent)
-{
-    setup(status);
-}   // end constructor
-
-void StatusWidget::setup(const status_t& status)
-{
-
-    auto mainLayout = new QHBoxLayout(this);
-    setLayout(mainLayout);
-
-    // TODO make a proper avatar
-    auto avatarLabel = new QLabel(this);
-    avatarLabel->setText(QString::fromStdString("<avatar>"));
-    avatarLabel->setMinimumSize(100, 100);
-    avatarLabel->setMaximumSize(100, 100);
-    mainLayout->addWidget(avatarLabel);
-
-    auto textLayout = new QVBoxLayout();
-    mainLayout->addItem(textLayout);
-
-    auto authorLabel = new QLabel(this);
-    authorLabel->setText(QString::fromStdString(status.account().acct()));
-    textLayout->addWidget(authorLabel);
-
-    auto contentLabel = new QLabel(this);
-    contentLabel->setText(QString::fromStdString(status.content()));
-    textLayout->addWidget(contentLabel);
-
-}   // end constructorLayout method
+///StatusWidget::StatusWidget(
+///        const status_t& status,
+///        QWidget* parent) :
+///    QWidget(parent)
+///{
+///    setup(status);
+///}   // end constructor
+///
+///void StatusWidget::setup(const status_t& status)
+///{
+///
+///    auto mainLayout = new QHBoxLayout(this);
+///    setLayout(mainLayout);
+///
+///    // TODO make a proper avatar
+///    auto avatarLabel = new QLabel(this);
+///    avatarLabel->setText(QString::fromStdString("<avatar>"));
+///    avatarLabel->setMinimumSize(100, 100);
+///    avatarLabel->setMaximumSize(100, 100);
+///    mainLayout->addWidget(avatarLabel);
+///
+///    auto textLayout = new QVBoxLayout();
+///    mainLayout->addItem(textLayout);
+///
+///    auto authorLabel = new QLabel(this);
+///    authorLabel->setText(QString::fromStdString(status.account().acct()));
+///    textLayout->addWidget(authorLabel);
+///
+///    auto contentLabel = new QLabel(this);
+///    contentLabel->setText(QString::fromStdString(status.content()));
+///    textLayout->addWidget(contentLabel);
+///
+///}   // end constructorLayout method

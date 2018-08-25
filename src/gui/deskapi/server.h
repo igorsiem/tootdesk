@@ -31,13 +31,14 @@
 #include <QUrl>
 #include <QVariant>
 
-#ifndef _td_gui_deskapi_h_included
-#define _td_gui_deskapi_h_included
+#ifndef _td_gui_server_h_included
+#define _td_gui_server_h_included
 
 namespace TootDesk { namespace Api {
 
 /**
- * \brief A mastodon Server Instance
+ * \brief Encapsulates a Mastodon server instance that can be queried for
+ * status items (Toots)
  *
  * \todo Expand this doco
  */
@@ -48,7 +49,7 @@ class Server
 
     public:
 
-    // -- Public Subtypes --
+    // -- Construction / Destruction --
 
     /**
      * \brief Initialise the server object with its URL
@@ -76,6 +77,8 @@ class Server
     Server(QString name, QString url) : Server(name, QUrl(url)) {}
 
     virtual ~Server(void) = default;    ///< Default destructor
+
+    // -- Validation --
 
     /**
      * \brief Determine whether the given URL is valid for use as a Mastodon
@@ -118,6 +121,8 @@ class Server
      * \return `true` if the Server object is valid
      */
     bool isValid(void) const;
+
+    // -- Accessors --
 
     /**
      * \brief Retrieve the human-readable name of the Server
@@ -177,6 +182,10 @@ class Server
      * \throws TootDesk::Api::Error If the Server URL is not valid
      */
     std::string mastodonAddress(void) const;
+
+    // -- Access Data --
+
+
 
     // --- Internal Declaratons ---
 

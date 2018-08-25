@@ -24,64 +24,64 @@
  */
 
 #include <QWidget>
-#include "mastodontypes.h"
+/// #include "mastodontypes.h"
 
 #ifndef _td_gui_statuswidget_h_included
 #define _td_gui_statuswidget_h_included
 
-/**
- * \brief A widget for displaying a Mastodon status item
- * 
- * \todo Expand this documentation
- * 
- * \todo This is just a barebones display of status text items - needs lots
- * of layout work
- *
- * \todo Consider deprecating / removing this widget in favour of a Model /
- * View set of classes
- */
-class StatusWidget : public QWidget
-{
-
-    Q_OBJECT
-
-    // --- External Interface ---
-
-    public:
-
-    // -- Constructor / Destructor --
-
-    /**
-     * \brief Constructor - initialises the status widget structure
-     * 
-     * \param status The mastodon status object, from which to populate the
-     * the widget information
-     * 
-     * \param parent The parent widget
-     */
-    StatusWidget(
-        const status_t& status,
-        QWidget* parent);
-
-    /**
-     * \brief Trivial destructor
-     */
-    virtual ~StatusWidget(void) {}
-
-    // --- Internal Declarations ---
-
-    protected:
-
-    // -- Helper Methods --
-
-    /**
-     * \brief Set up the various child objects of the status widget
-     * 
-     * All child objects are automatically destroyed by the Qt framework
-     * when the parent is destroted.
-     */
-    void setup(const status_t& status);
-
-};  // end StatusWidget class
+////**
+/// * \brief A widget for displaying a Mastodon status item
+/// * 
+/// * \todo Expand this documentation
+/// * 
+/// * \todo This is just a barebones display of status text items - needs lots
+/// * of layout work
+/// *
+/// * \todo Consider deprecating / removing this widget in favour of a Model /
+/// * View set of classes
+/// */
+///class StatusWidget : public QWidget
+///{
+///
+///    Q_OBJECT
+///
+///    // --- External Interface ---
+///
+///    public:
+///
+///    // -- Constructor / Destructor --
+///
+///    /**
+///     * \brief Constructor - initialises the status widget structure
+///     * 
+///     * \param status The mastodon status object, from which to populate the
+///     * the widget information
+///     * 
+///     * \param parent The parent widget
+///     */
+///    StatusWidget(
+///        const status_t& status,
+///        QWidget* parent);
+///
+///    /**
+///     * \brief Trivial destructor
+///     */
+///    virtual ~StatusWidget(void) {}
+///
+///    // --- Internal Declarations ---
+///
+///    protected:
+///
+///    // -- Helper Methods --
+///
+///    /**
+///     * \brief Set up the various child objects of the status widget
+///     * 
+///     * All child objects are automatically destroyed by the Qt framework
+///     * when the parent is destroted.
+///     */
+///    void setup(const status_t& status);
+///
+///};  // end StatusWidget class
 
 #endif

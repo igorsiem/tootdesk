@@ -43,7 +43,6 @@
 #include "ui_mainwindow.h"
 
 ///#include "lambdarunnable.h"
-///#include "simpleaddresswidget.h"
 ///#include "statuswidget.h"
 ///#include "timelinewidget.h"
 
@@ -54,7 +53,6 @@ MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
     , ui(new Ui::MainWindow)
     , m_settings(settings)
     , m_servers()
-///    , m_timelineWidget(nullptr)
 {
 
     // Retrieve servers info from persistent settings
@@ -64,7 +62,6 @@ MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
 
     setupUi();
 
-///    setup();
 }   // end constructor
 
 MainWindow::~MainWindow()

@@ -25,24 +25,25 @@
 
 #include "timelinewidget.h"
 
-TimelineWidget::TimelineWidget(QWidget* parent) : QListWidget(parent)
-{
-}   // end constructor
-
-void TimelineWidget::add(ConstStatusPtr status)
-{
-
-    auto statusWidget = new StatusWidget(*status, this);
-
-    auto listWidgetItem = new QListWidgetItem;
-
-    // TODO fix sizing, so that the status widget tells us what size it needs
-    listWidgetItem->setSizeHint(
-        QSize(
-            statusWidget->size().width(),
-            100));
-
-    insertItem(0, listWidgetItem);
-    setItemWidget(listWidgetItem, statusWidget);
-
-}   // end add method
+///TimelineWidget::TimelineWidget(QWidget* parent) : QListWidget(parent)
+///{
+///}   // end constructor
+///
+///void TimelineWidget::add(ConstStatusPtr status)
+///{
+///
+///    auto statusWidget = new StatusWidget(*status, this);
+///
+///    auto listWidgetItem = new QListWidgetItem;
+///
+///    // TODO fix sizing, so that the status widget tells us what size it needs
+///    listWidgetItem->setSizeHint(
+///        QSize(
+///            statusWidget->size().width(),
+///            100));
+///
+///    insertItem(0, listWidgetItem);
+///    setItemWidget(listWidgetItem, statusWidget);
+///
+///}   // end add method
+///
