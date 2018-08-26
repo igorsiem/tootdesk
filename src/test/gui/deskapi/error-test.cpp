@@ -26,7 +26,7 @@
 #include <catch/catch.hpp>
 #include <gui/deskapi/deskapi.h>
 
-namespace tdapi = TootDesk::Api;
+namespace TdApi = TootDesk::Api;
 
 // Test the basic operation of the Error class and the TD_RAISE_API_ERROR
 // macro
@@ -38,7 +38,7 @@ TEST_CASE("TootDesk::Api::Error", "[unit][tdapi]")
         TD_RAISE_API_ERROR("test");
         FAIL("Error exception should have been thrown before this");
     }
-    catch (const tdapi::Error& error)
+    catch (const TdApi::Error& error)
     {
         REQUIRE(error.message() == "test");
     }
@@ -49,3 +49,25 @@ TEST_CASE("TootDesk::Api::Error", "[unit][tdapi]")
     }
 
 }   // end error test
+
+// Simple test of the MastodonError exception class - checking that the macro
+// throws as we expect, and that the human-readable message is generated
+// correctly.
+TEST_CASE("TootDesk::Api::MastodonError", "[unit][tdapi]")
+{
+    try
+    {
+        TD_RAISE_API_MASTODON_ERROR(11);
+        FAIL("Mastodon Error exception should have been thrown before this");
+    }
+    catch (const TdApi::MastodonError& error)
+    {
+        REQUIRE(error.message() == QObject::tr("invalid call"));
+    }
+    catch (...)
+    {
+        FAIL("Mastodon Error exception should have been thrown, but some "
+            "other exception was thrown instead");
+
+    }
+}   // end MastodonError test

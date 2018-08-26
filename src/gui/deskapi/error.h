@@ -77,6 +77,12 @@ class Error : public QException
 
 }}  // end TootDesk::Api class
 
+/**
+ * \brief Raise a generic API Error as an exception with the given message
+ * 
+ * \param msg The message to accompany the exception - streamed components
+ * may be used
+ */
 #define TD_RAISE_API_ERROR( msg ) do { \
     QString message; \
     QTextStream strm(&message); \

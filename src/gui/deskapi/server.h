@@ -42,8 +42,10 @@ namespace TootDesk { namespace Api {
  * 
  * This class implements a Qt-style interace for the `Mastodon::Easy::Easy`
  * and `Mastodon::Easy::Instance` classes.
+ * 
+ * `Server` methods are thread-safe.
  *
- * \todo Expand this doco
+ * \todo Expand and tidy up this doco
  */
 class Server : public QObject
 {

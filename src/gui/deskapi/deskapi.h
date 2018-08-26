@@ -25,6 +25,8 @@
 
 #include "error.h"
 #include "lambdarunnable.h"
+#include "mastodonerror.h"
+#include "mastodontypes.h"
 #include "server.h"
 
 #ifndef _td_gui_deskapi_deskapi_h_included
