@@ -83,4 +83,15 @@ using WriteGuard = QWriteLocker;
 
 }}  // end TootDesk::Api namespace
 
+/**
+ * \brief Declare shared pointer types for an object of the given type, and
+ * a const object of the given type
+ * 
+ * \param TypeName the name of the base type
+ */
+#define TD_DECLARE_SHARED_POINTERS_FOR( TypeName ) \
+    using TypeName##Ptr = ::TootDesk::Api::SharedPtr<TypeName>; \
+    using Const##TypeName##Ptr = ::TootDesk::Api::SharedPtr<const TypeName>;
+
+
 #endif

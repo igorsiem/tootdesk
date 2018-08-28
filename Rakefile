@@ -185,6 +185,12 @@ namespace :test do
         test_exe_file_name = "test-tootdesk.exe"
     end
 
+    task :current => :bin do
+        cmd_line = test_dir + "/" + test_exe_file_name + " [current]"
+
+        sh cmd_line
+    end
+
     desc "run offline tests only"
     task :offline => :bin do
         cmd_line = test_dir + "/" + test_exe_file_name + " ~[online]"

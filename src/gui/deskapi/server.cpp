@@ -26,21 +26,50 @@
 #include <sstream>
 
 #include <QDebug>
+#include <QThreadPool>
 
-#include "error.h"
+#include <mastodon-cpp/mastodon-cpp.hpp>
+#include <mastodon-cpp/easy/all.hpp>
+
+#include "mastodonerror.h"
 #include "server.h"
 
 namespace TootDesk { namespace Api {
 
 Server::Server(QString name, QUrl url, QObject* parent) :
     QObject(parent)
-    , m_mtx()
+    , m_dataMtx()
+    , m_onlineOperationInProgress(false)
+    , m_shuttingDown(false)
     , m_name(std::move(name))
     , m_url(std::move(url))
+    , m_instanceDataIsCurrent(false)
+    , m_instanceTitle()
+    , m_instanceDescription()
+    , m_workerThread(nullptr)
+    , m_tasksMtx()
+    , m_tasks()
+    , m_timeToCheckForTasks()
 {
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
         "is invalid";
+
+    // Start the worker thread for this server
+    m_workerThread =
+        makeShared<std::thread>([this](void) { processTasks(); });
 }   // end constructor
+
+Server::~Server(void) noexcept
+{
+    qDebug() << __FUNCTION__ << "- Server" << name() << "shutdown";
+
+    // Tell the worker thread that it's time to stop, wake it up if
+    // necessary, then wait for it to finish.
+    m_shuttingDown = true;
+    m_timeToCheckForTasks.wakeAll();
+    m_workerThread->join();
+
+}   // end destructor
 
 bool Server::isValid(const QUrl& url)
 {
@@ -56,13 +85,13 @@ bool Server::isValid(const QUrl& url)
 
 bool Server::isValid(void) const
 {
-    ReadGuard grd(&m_mtx);
+    ReadGuard grd(&m_dataMtx);
     return isValid(m_url);
 }   // end isValid
 
 QString Server::name(void) const
 {
-    ReadGuard grd(&m_mtx);
+    ReadGuard grd(&m_dataMtx);
 
     if (m_name.isEmpty())
     {
@@ -76,17 +105,23 @@ QString Server::name(void) const
 
 void Server::setUrl(QUrl url)
 {
-    WriteGuard grd(&m_mtx);
+    WriteGuard grd(&m_dataMtx);
     m_url = std::move(url);
+
+    // Our instance data is no longer currnet
+    m_instanceDataIsCurrent = false;
+
     grd.unlock();
+
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
         "is invalid";
 }   // end setUrl method
 
 void Server::setUrl(QString url)
 {
-    WriteGuard grd(&m_mtx);
+    WriteGuard grd(&m_dataMtx);
     m_url = QUrl(std::move(url));
+    m_instanceDataIsCurrent = false;
     grd.unlock();
     if (!isValid()) qWarning() << "Server address" << url << "is invalid";
 }   // end setUrl
@@ -97,7 +132,7 @@ std::string Server::mastodonAddress(void) const
         TD_RAISE_API_ERROR(QObject::tr("server address not valid: ") <<
             m_url.toString());
 
-    ReadGuard grd(&m_mtx);
+    ReadGuard grd(&m_dataMtx);
     std::stringstream strm;
     strm << m_url.host().toStdString();
 
@@ -106,6 +141,105 @@ std::string Server::mastodonAddress(void) const
 
     return std::move(strm.str());
 }   // end mastodonAddress
+
+bool Server::instanceDataIsCurrent(void) const
+{
+    ReadGuard grd(&m_dataMtx);
+    return m_instanceDataIsCurrent;    
+}
+
+boost::optional<std::tuple<QString, QString> >
+Server::instanceData(void) const
+{
+    ReadGuard grd(&m_dataMtx);
+    if (m_instanceDataIsCurrent)
+        return std::make_tuple(m_instanceTitle, m_instanceDescription);
+    else return boost::none;
+}
+
+void Server::retrieveInstanceInfo(void)
+{
+
+    enqueue([this](void)
+    {
+
+        qDebug() << "starting retrieve instance info task -" <<
+            QString::fromStdString(mastodonAddress());
+
+        m_onlineOperationInProgress = true;
+
+        Mastodon::Easy masto(mastodonAddress(), "");    // no need to auth
+        std::string response;
+
+        m_onlineOperationInProgress = false;
+
+        // TODO check for errors here
+        qDebug() << "    commencing get...";
+        masto.get(Mastodon::API::v1::instance, response);
+        qDebug() << "    ... get completed";
+
+        Mastodon::Easy::Instance instanceData(response);
+
+        WriteGuard grd(&m_dataMtx);
+        m_instanceTitle = QString::fromStdString(instanceData.title());
+        m_instanceDescription =
+            QString::fromStdString(instanceData.description());
+        m_instanceDataIsCurrent = true;
+        grd.unlock();
+
+        emit instanceInfoRetrieved();
+
+        qDebug() << "finished retrieve instance info task -" <<
+            QString::fromStdString(mastodonAddress());
+
+    });
+
+}   // end retrieveInstanceInfo
+
+void Server::processTasks(void)
+{
+    // TODO exception handling
+
+    qDebug() << "Server" << name() << "background processing begins";
+
+    // Loop until the 'shutting down' flag is raised
+    while (m_shuttingDown.load() == false)
+    {
+        // Wait until there are tasks in the queue (or it's time to shut
+        // down)
+        WriteGuard tasksGrd(&m_tasksMtx);
+
+        qDebug() << "thread about to sleep";
+
+        if (m_tasks.empty() && (m_shuttingDown.load() == false))
+            m_timeToCheckForTasks.wait(&m_tasksMtx);
+
+        // We've woken up - is it time to stop?
+        if (m_shuttingDown.load()) break;
+
+        // Get the next task from the queue
+        auto task = m_tasks.dequeue();
+
+        tasksGrd.unlock();
+
+        // Execute the task, and mark it as done.
+        std::get<0>(*task)();
+///        std::get<1>(*task) = true;
+    }
+
+    qDebug() << "Server" << name() << "background processing ends";
+}   // end process tasks
+
+void Server::enqueue(TaskFn fn)
+{
+    auto t = makeShared<Task>(fn);
+
+    WriteGuard grd(&m_tasksMtx);
+    m_tasks.enqueue(t);
+    grd.unlock();
+
+    m_timeToCheckForTasks.wakeAll();
+}   // end enqueue
 
 QMap<QString, QVariant>& convertForSerialisation(
         const ServerByNameMap& servers,

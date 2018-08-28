@@ -20,7 +20,8 @@ cmake_minimum_required(VERSION 3.10)
 project(tootdesk LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -pthread")
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
 
 # Qt Stuff
 # Run moc as needed

@@ -23,5 +23,26 @@
  * \copyright GPL 3.0
  */
 
-#define CATCH_CONFIG_MAIN
+// #define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch/catch.hpp>
+#include <gui/deskapi/server.h>
+
+/**
+ * \brief Entry point to the CATCH-based test executable
+ * 
+ * \param argc The number of command-line arguments
+ * 
+ * \param argv The vector of command-line arguments
+ * 
+ * \return Non-zero on failure
+ */
+int main( int argc, char* argv[] )
+{
+    // Register Qt metatypes
+    qRegisterMetaType<TootDesk::Api::ServerPtr>();
+
+    // Run our tests
+    return Catch::Session().run( argc, argv );
+}   // end main function
+

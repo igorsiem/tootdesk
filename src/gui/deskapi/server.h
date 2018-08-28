@@ -23,11 +23,20 @@
  * \copyright GPL 3.0
  */
 
+#include <atomic>
+#include <thread>
+
+#include <boost/optional.hpp>
+
+#include <QDebug>
 #include <QMap>
+#include <QMetaType>
 #include <QObject>
+#include <QQueue>
 #include <QString>
 #include <QUrl>
 #include <QVariant>
+#include <QWaitCondition>
 
 #include "coretypes.h"
 
@@ -42,6 +51,12 @@ namespace TootDesk { namespace Api {
  * 
  * This class implements a Qt-style interace for the `Mastodon::Easy::Easy`
  * and `Mastodon::Easy::Instance` classes.
+ * 
+ * Each Server object runs a background thread for online operations. The
+ * thread is created (and started) in the constructor, but sleeps until there
+ * is a background task for the server to perform. We acknowledge that the
+ * 'thread per Server' design is not particularly scalable, but the number of
+ * Servers is expected to be 'small'.
  * 
  * `Server` methods are thread-safe.
  *
@@ -85,7 +100,11 @@ class Server : public QObject
      */
     Server(QString name, QString url) : Server(name, QUrl(url)) {}
 
-    virtual ~Server(void) = default;    ///< Default destructor
+    /**
+     * \brief Destructor - ensures that background thread is properly shut
+     * down and joined before exiting
+     */
+    virtual ~Server(void) noexcept;
 
     // -- Validation --
 
@@ -192,23 +211,104 @@ class Server : public QObject
      */
     std::string mastodonAddress(void) const;
 
-    // -- Access Data --
+    /**
+     * \brief Check whether or not this server has an online operation in
+     * progress
+     * 
+     * \return `true` if this Server is currently executing an online
+     * operation
+     */
+    bool onlineOperationInProgress(void) const
+        { return m_onlineOperationInProgress.load(); }
 
+    /**
+     * \brief Retrieve flag indicating whether instance data is current
+     * 
+     * Instance data is retrieved from the server (using the
+     * `retrieveInstanceInfo` method). This flag is set to `true` after the
+     * data is retrieved. It is cleared if the URL is changed.
+     * 
+     * \return True if the instance data is current.
+     */
+    bool instanceDataIsCurrent(void) const;
 
+    /**
+     * \brief Retrieve the instance data, if it is current
+     * 
+     * Instance data is retrieved from the server (using the
+     * `retrieveInstanceInfo` method). This method retrieves the Title and
+     * Description fields (as a tuple) if the data is current.
+     */
+    boost::optional<std::tuple<QString, QString> >
+    instanceData(void) const;
+
+    // -- Remote Operations --
+
+    void retrieveInstanceInfo(void);
+
+    signals:
+
+    void instanceInfoRetrieved(void);
 
     // --- Internal Declaratons ---
 
     protected:
 
+    // -- Internal Types --
+
     /**
-     * \brief MT synchronised access to the internals of a Server object
+     * \brief A callable object that is placed in a queue to be executed
+     * as a task
      */
-    mutable Mutex m_mtx;
+    using TaskFn = std::function<void(void)>;
+
+    /**
+     * \brief A structure intended for background execution, comprised of a
+     * callable object and a 'done' flag
+     */
+    using Task = std::tuple<TaskFn>;
+
+    TD_DECLARE_SHARED_POINTERS_FOR(Task);
+
+    /**
+     * \brief A queue of shared pointers to task objects
+     */
+    using TaskQueue = QQueue<TaskPtr>;
+
+    // -- Helper Functions --
+
+    void processTasks(void);
+
+    void enqueue(TaskFn fn);
+
+    // -- Attributes --
+
+    // - Status / Housekeeping -
+
+    /**
+     * \brief Mutex protecting MT access to the basic data of our server
+     */
+    mutable Mutex m_dataMtx;
+
+    /**
+     * \brief Flag indicating that an online operation is currently in
+     * progress
+     */
+    std::atomic<bool> m_onlineOperationInProgress;
+
+    /**
+     * \brief Flag indicating that the server is about to be destroyed - no
+     * new operations should be started
+     */
+    std::atomic<bool> m_shuttingDown;
+
+    // - Data About the Server -
 
     /**
      * \brief Human-readable name for the Instance
      *
      * This may be empty. If so, the `mastodonAddress` is used as the name.
+     * This attribute is protected by `m_dataMtx`.
      */
     QString m_name;
 
@@ -216,21 +316,61 @@ class Server : public QObject
      * \brief The URL of the server
      *
      * We take the `host` and `port` components (if specified) for the
-     * Mastodon server
+     * Mastodon server. This attribute is protected by `m_dataMtx`.
      */
     QUrl m_url;
 
+    // - Instance Information -
+
+    /**
+     * \brief Flag indicating that the instance data is up to date
+     * 
+     * This flag is set when the instance information is retrieve (just
+     * before emitting `instanceInfoRetrieved`), and cleared when the URL
+     * is changed. Access to this attribute is protected by `m_dataMtx`.
+     */
+    bool m_instanceDataIsCurrent;
+
+    /**
+     * \brief The human-readable Title of the Instance
+     * 
+     * This data is retrieved from the server using the
+     * `retrieveInstanceInfo` method. The `m_instanceDataIsCurrent`
+     * indicates whether it is current. Access to this attribute is protected
+     * by `m_dataMtx`.
+     */
+    QString m_instanceTitle;
+
+    /**
+     * \brief The human-readable Description of the Instance
+     * 
+     * This data is retrieved from the server using the
+     * `retrieveInstanceInfo` method. The `m_instanceDataIsCurrent`
+     * indicates whether it is current. Access to this attribute is protected
+     * by `m_dataMtx`.
+     */
+    QString m_instanceDescription;
+
+    /**
+     * \brief A background thread for executing queued tasks
+     */
+    SharedPtr<std::thread> m_workerThread;
+
+    /**
+     * \brief Mutex protecting the `m_tasks` queue
+     */
+    mutable Mutex m_tasksMtx;
+
+    /**
+     * \brief The queue of tasks for background execution
+     */
+    TaskQueue m_tasks;
+
+    QWaitCondition m_timeToCheckForTasks;
+
 };  // end Server class
 
-/**
- * \brief A shared pointer to a Server object
- */
-using ServerPtr = SharedPtr<Server>;
-
-/**
- * \brief A shared pointer to a const Server object
- */
-using ConstServerPtr = SharedPtr<const Server>;
+TD_DECLARE_SHARED_POINTERS_FOR(Server)
 
 /**
  * \brief A std::map of shared pointers to `Server` objects, indexed by Name

@@ -23,6 +23,7 @@
  * \copyright GPL 3.0
  */
 
+#include <thread>
 #include <catch/catch.hpp>
 #include <gui/deskapi/deskapi.h>
 
@@ -140,3 +141,44 @@ TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
     REQUIRE(recoveredServers["s3"]->url() == QUrl("http://example3.com"));
 
 }   // end Server serialisation test
+
+TEST_CASE("TootDesk::Api::Server serialisation online operations",
+        "[unit]tdapi][online][current]")
+{
+    TdApi::Server server("http://mastodon.social");
+
+///    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    REQUIRE(server.isValid());
+
+    // Right now, the Server is valid, has no operation in progress, and no
+    // current instance data
+    REQUIRE(server.isValid());
+    REQUIRE(!server.onlineOperationInProgress());
+    REQUIRE(!server.instanceDataIsCurrent());
+    
+    server.retrieveInstanceInfo();
+    while (server.instanceDataIsCurrent() == false)
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Now, sever has valid instance data
+    REQUIRE(!server.onlineOperationInProgress());
+    REQUIRE(server.instanceDataIsCurrent());
+
+    // Data is retrievable, and includes non-empty strings.
+    auto result = server.instanceData();
+    REQUIRE(result);
+
+    // std::cout
+    //     << std::endl << "[DEBUG] title: " <<
+    //         std::get<0>(*result).toStdString()
+    //     << std::endl << "[DEBUG] description: " <<
+    //         std::get<1>(*result).toStdString()
+    //     << std::endl;
+
+    REQUIRE(std::get<0>(*result).isEmpty() == false);
+    REQUIRE(std::get<1>(*result).isEmpty() == false);
+
+///    FAIL("tests are incomplete");
+
+}   // end online Server test
