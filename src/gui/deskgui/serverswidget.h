@@ -24,7 +24,10 @@
  */
 
 #include <QDebug>
+#include <QFormLayout>
 #include <QItemSelectionModel>
+#include <QLabel>
+#include <QMovie>
 #include <QResizeEvent>
 #include <QSettings>
 #include <QTableView>
@@ -67,9 +70,26 @@ class ServersWidget : public QWidget
      */
     void serversCollectionChanged(void);
 
+    void newServerCreated(Api::ServerPtr server);
+
     // --- Internal Declarations ---
 
+    protected slots:
+
+    void serverInstanceInfoRetrieved(QString title, QString description)
+    {
+        setInstanceInfo(title, description);
+    }
+
+    void serverErrorOccurred(QString serverName, QString errorMsg)
+    {
+        setInstanceInfoNone(tr("Error retrieving instance data: ") +
+            errorMsg);
+    }
+
     protected:
+
+    // -- Event-handler Overrides --
 
     /**
      * \brief Set table column widths when the widget is resized
@@ -97,9 +117,31 @@ class ServersWidget : public QWidget
         QWidget::resizeEvent(e);
     }   // end resizeEvent method
 
+    // -- UI Setup Functions --
+
+    void setupInstanceInfoWidget(void);
+
     // -- Helper Functions --
 
     void addNewServer(QString name, QString url);
+
+    void clearInstanceInfo(void);
+
+    void setInstanceInfoNone(QString message);
+
+    void setInstanceInfo(QString instanceTitle, QString instanceDescription);
+
+    void setInstanceInfoWaiting(void);
+
+    Api::ServerPtr serverAtIndex(int index)
+    {
+        if ((index < 0) || (index >= m_servers.size())) return nullptr;
+
+        auto serverItr = m_servers.begin();
+        for (int i = 0; i < index; i++) serverItr++;
+
+        return serverItr.value();
+    }
 
     // -- Attributes --
 
@@ -121,6 +163,18 @@ class ServersWidget : public QWidget
      * the Table View of the model
      */
     Gui::ServerTableModel* m_serverTableModel;
+
+    QWidget* m_instanceInfoWidget;
+
+    QFormLayout* m_instanceInfoLayout;
+
+    QLabel* m_instanceInfoNoneLabel;
+
+    std::tuple<QMovie*, QLabel*> m_instanceInfoWaitingWidgets;
+
+    std::tuple<QLabel*, QLabel*, QLabel*, QLabel*> m_instanceInfoDataWidgets;
+
+    QMetaObject::Connection m_serverInstanceInfoConnection;
 
 };  // end ServersWidget class
 

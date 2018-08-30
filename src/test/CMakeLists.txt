@@ -23,8 +23,8 @@ add_executable(test-tootdesk
 )
 
 # Comment out these lines to alllow console debug / warning output in tests
-# add_definitions(-DQT_NO_DEBUG_OUTPUT)
-# add_definitions(-DQT_NO_WARNING_OUTPUT)
+add_definitions(-DQT_NO_DEBUG_OUTPUT)
+add_definitions(-DQT_NO_WARNING_OUTPUT)
 
 target_link_libraries(test-tootdesk
     Qt5::Widgets

@@ -27,6 +27,7 @@
 ///#include <QListWidget>
 ///#include <QListWidgetItem>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QSettings>
 ///#include <QPushButton>
 ///#include <mastodon-cpp/mastodon-cpp.hpp>
@@ -132,6 +133,16 @@ class MainWindow : public QMainWindow
     signals:
 
 ///    void statusDecoded(ConstStatusPtr status);
+
+    protected slots:
+
+    void serverErrorOccurred(QString serverName, QString errorMessage)
+    {
+        QMessageBox::critical(
+            this,
+            tr("Server: ") + serverName,
+            tr("Error: ") + errorMessage);
+    }
 
     // - Mastodon Stuff -
 

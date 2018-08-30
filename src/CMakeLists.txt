@@ -24,8 +24,9 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -pthread")
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
 
 # Qt Stuff
-# Run moc as needed
+# Run moc and RCC as needed
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 # Tell Cmake where to find Qt stuff
 set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)

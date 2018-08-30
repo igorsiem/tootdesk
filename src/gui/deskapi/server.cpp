@@ -61,13 +61,13 @@ Server::Server(QString name, QUrl url, QObject* parent) :
 
 Server::~Server(void) noexcept
 {
-    qDebug() << __FUNCTION__ << "- Server" << name() << "shutdown";
-
     // Tell the worker thread that it's time to stop, wake it up if
     // necessary, then wait for it to finish.
     m_shuttingDown = true;
     m_timeToCheckForTasks.wakeAll();
     m_workerThread->join();
+
+    qDebug() << __FUNCTION__ << "- Server" << name() << "has shut down";
 
 }   // end destructor
 
@@ -173,10 +173,11 @@ void Server::retrieveInstanceInfo(void)
 
         m_onlineOperationInProgress = false;
 
-        // TODO check for errors here
-        qDebug() << "    commencing get...";
-        masto.get(Mastodon::API::v1::instance, response);
-        qDebug() << "    ... get completed";
+        // Get the info, checking for errors
+        qDebug() << "    " << name() << "commencing get...";
+        auto result = masto.get(Mastodon::API::v1::instance, response);
+        if (result) MastodonError(result).raise();
+        qDebug() << "    ... " << name() << "get completed";
 
         Mastodon::Easy::Instance instanceData(response);
 
@@ -187,7 +188,9 @@ void Server::retrieveInstanceInfo(void)
         m_instanceDataIsCurrent = true;
         grd.unlock();
 
-        emit instanceInfoRetrieved();
+        emit instanceInfoRetrieved(
+            m_instanceTitle,
+            m_instanceDescription);
 
         qDebug() << "finished retrieve instance info task -" <<
             QString::fromStdString(mastodonAddress());
@@ -209,7 +212,7 @@ void Server::processTasks(void)
         // down)
         WriteGuard tasksGrd(&m_tasksMtx);
 
-        qDebug() << "thread about to sleep";
+///        qDebug() << "thread about to sleep";
 
         if (m_tasks.empty() && (m_shuttingDown.load() == false))
             m_timeToCheckForTasks.wait(&m_tasksMtx);
@@ -222,9 +225,38 @@ void Server::processTasks(void)
 
         tasksGrd.unlock();
 
-        // Execute the task, and mark it as done.
-        std::get<0>(*task)();
-///        std::get<1>(*task) = true;
+        // Execute the task, catching all errors. These are emitted as
+        // signals from the Server component (as well as logged to
+        // qCritical).
+        try
+        {
+            std::get<0>(*task)();
+        }
+        catch (const Error& error)
+        {
+            qCritical() << "Server" << name() << "encountered the "
+                "following error:" << error.message();
+
+            emit errorOccurred(name(), error.message());
+        }
+        catch (const std::exception& error)
+        {
+            auto message = QString::fromStdString(error.what());
+
+            qCritical() << "Server" << name() << "encountered the "
+                "following error:" << message;
+
+            emit errorOccurred(name(), message);
+        }
+        catch (...)
+        {
+            QString message("unrecognised exception / error condition");
+
+            qCritical() << "Server" << name() << "encountered the "
+                "following error:" << message;
+
+            emit errorOccurred(name(), message);
+        }
     }
 
     qDebug() << "Server" << name() << "background processing ends";

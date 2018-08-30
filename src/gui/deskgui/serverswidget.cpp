@@ -23,7 +23,6 @@
  * \copyright GPL 3.0
  */
 
-#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTableView>
@@ -43,6 +42,12 @@ ServersWidget::ServersWidget(
     , m_servers(servers)
     , m_serverTableView(nullptr)
     , m_serverTableModel(nullptr)
+    , m_instanceInfoWidget(nullptr)
+    , m_instanceInfoLayout(nullptr)
+    , m_instanceInfoNoneLabel(nullptr)
+    , m_instanceInfoWaitingWidgets(nullptr, nullptr)
+    , m_instanceInfoDataWidgets(nullptr, nullptr, nullptr, nullptr)
+    , m_serverInstanceInfoConnection()
 {
 
     // Set up our layout as a V-Box with no margins
@@ -64,7 +69,7 @@ ServersWidget::ServersWidget(
     m_serverTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_serverTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    m_serverTableView->selectRow(0);
+    setupInstanceInfoWidget();
 
     // Put a toolbar at the bottom of the widget for editing functions.
     auto toolBar = new QToolBar(this);
@@ -242,13 +247,89 @@ ServersWidget::ServersWidget(
                     m_servers.erase(serverItr);
                     m_serverTableModel->endServerCollectionChange();
 
+                    setInstanceInfoNone(tr("No Server selected"));
+
                     emit serversCollectionChanged();
                 }
             }
             TD_ACTION_CATCH_ALL_FROM(tr("Delete Server"))
         });
 
+    // Action when selection is changed - we want to populate the Instance
+    // Info section
+    connect(
+        m_serverTableView->selectionModel(),
+        &QItemSelectionModel::currentRowChanged,
+        [this](const QModelIndex& current, const QModelIndex& previous)
+        {
+
+            // If there is some other retrieval in progress, ignore it for
+            // now (info will be retained for later use by the server
+            // object) 
+            if (m_serverInstanceInfoConnection)
+                disconnect(m_serverInstanceInfoConnection);
+
+            auto server = serverAtIndex(current.row());
+
+            if (server)
+            {
+                // Only retrieve the instance data from online if we need to.
+                if (server->instanceDataIsCurrent())
+                {
+                    auto  data = server->instanceData();
+                    setInstanceInfo(
+                        std::get<0>(*data),
+                        std::get<1>(*data));
+                }
+                else
+                {
+                    qDebug() << "server" << server->name() << "selected";
+
+                    m_serverInstanceInfoConnection = connect(
+                        server.get(),
+                        &Api::Server::instanceInfoRetrieved,
+                        this,
+                        &ServersWidget::serverInstanceInfoRetrieved);
+            
+                    setInstanceInfoWaiting();
+                    server->retrieveInstanceInfo();
+                }
+            }   // end if a server is selected
+            else
+            {
+                qDebug() << "no server selected";
+
+                setInstanceInfoNone(tr("No Server selected"));
+            }
+        });
+
+    // Connect up the Server error signal so that Server Error status is
+    // displayed
+    for (auto server : m_servers)
+        connect(
+            server.get(),
+            &Api::Server::errorOccurred,
+            this,
+            &ServersWidget::serverErrorOccurred);
+
+    m_serverTableView->selectRow(0);
+
 }   // end constructor
+
+void ServersWidget::setupInstanceInfoWidget(void)
+{
+
+    m_instanceInfoWidget = new QWidget(this);
+    layout()->addWidget(m_instanceInfoWidget);
+    m_instanceInfoLayout = new QFormLayout(m_instanceInfoWidget);
+    m_instanceInfoWidget->setLayout(m_instanceInfoLayout);
+
+    m_instanceInfoLayout->addRow(
+        new QLabel(tr("<b>Instance information</b>"), m_instanceInfoWidget));
+
+    setInstanceInfoNone(tr("No Server selected"));
+
+}   // end setupInstanceInfoWidget method
 
 void ServersWidget::addNewServer(QString name, QString url)
 {
@@ -260,14 +341,84 @@ void ServersWidget::addNewServer(QString name, QString url)
 
     // Create the Server object - we've already checked for validity and
     // duplicate names - and add it to the servers collection
-///    auto newServer = std::make_shared<Api::Server>(name,  _url);
     auto newServer = Api::makeShared<Api::Server>(name, _url);
 
     m_serverTableModel->beginServerCollectionChange();
     m_servers[newServer->name()] = newServer;
     m_serverTableModel->endServerCollectionChange();
+
+    connect(
+        newServer.get(),
+        &Api::Server::errorOccurred,
+        this,
+        &ServersWidget::serverErrorOccurred);
     
-     emit serversCollectionChanged();
+    emit newServerCreated(newServer);
+    emit serversCollectionChanged();
 }   // end addNewServer method
+
+void ServersWidget::clearInstanceInfo(void)
+{
+    delete m_instanceInfoNoneLabel;
+    m_instanceInfoNoneLabel = nullptr;   
+
+    delete std::get<0>(m_instanceInfoDataWidgets);
+    delete std::get<1>(m_instanceInfoDataWidgets);
+    delete std::get<2>(m_instanceInfoDataWidgets);
+    delete std::get<3>(m_instanceInfoDataWidgets);
+    m_instanceInfoDataWidgets =
+        std::make_tuple(nullptr, nullptr, nullptr, nullptr);
+
+    delete std::get<0>(m_instanceInfoWaitingWidgets);
+    delete std::get<1>(m_instanceInfoWaitingWidgets);
+    m_instanceInfoWaitingWidgets = std::make_tuple(nullptr, nullptr);
+}
+
+void ServersWidget::setInstanceInfoNone(QString message)
+{
+    clearInstanceInfo();
+    m_instanceInfoNoneLabel = new QLabel(message, this);
+    m_instanceInfoNoneLabel->setWordWrap(true);
+    m_instanceInfoLayout->addRow(m_instanceInfoNoneLabel);
+}   // end setInstanceInfoNone method
+
+void ServersWidget::setInstanceInfo(
+        QString instanceTitle,
+        QString instanceDescription)
+{
+    clearInstanceInfo();
+
+    m_instanceInfoDataWidgets =
+        std::make_tuple(
+            new QLabel(tr("Title:"), m_instanceInfoWidget)
+            , new QLabel(instanceTitle, m_instanceInfoWidget)
+            , new QLabel(tr("Description:"), m_instanceInfoWidget)
+            , new QLabel(instanceDescription, m_instanceInfoWidget));
+
+    std::get<1>(m_instanceInfoDataWidgets)->setWordWrap(true);
+    std::get<3>(m_instanceInfoDataWidgets)->setWordWrap(true);
+
+    m_instanceInfoLayout->addRow(
+        std::get<0>(m_instanceInfoDataWidgets)
+        , std::get<1>(m_instanceInfoDataWidgets));
+    m_instanceInfoLayout->addRow(
+        std::get<2>(m_instanceInfoDataWidgets)
+        , std::get<3>(m_instanceInfoDataWidgets));
+}   // end setInstanceInfo methodp
+
+void ServersWidget::setInstanceInfoWaiting(void)
+{
+    clearInstanceInfo();
+
+    m_instanceInfoWaitingWidgets =
+        std::make_tuple(
+            new QMovie(":/spinner", QByteArray(), m_instanceInfoWidget),
+            new QLabel(m_instanceInfoWidget));
+    std::get<1>(m_instanceInfoWaitingWidgets)->setMovie(
+        std::get<0>(m_instanceInfoWaitingWidgets));
+    
+    m_instanceInfoLayout->addRow(std::get<1>(m_instanceInfoWaitingWidgets));
+    std::get<0>(m_instanceInfoWaitingWidgets)->start();
+}   // end setInstanceInfoWaiting method
 
 }}  // end TootDesk::Gui namespace

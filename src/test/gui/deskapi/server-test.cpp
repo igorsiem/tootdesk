@@ -147,8 +147,6 @@ TEST_CASE("TootDesk::Api::Server serialisation online operations",
 {
     TdApi::Server server("http://mastodon.social");
 
-///    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     REQUIRE(server.isValid());
 
     // Right now, the Server is valid, has no operation in progress, and no
@@ -179,6 +177,8 @@ TEST_CASE("TootDesk::Api::Server serialisation online operations",
     REQUIRE(std::get<0>(*result).isEmpty() == false);
     REQUIRE(std::get<1>(*result).isEmpty() == false);
 
-///    FAIL("tests are incomplete");
+    // TdApi::Server invalidServer("http://abc.xyz");
+    // invalidServer.retrieveInstanceInfo();
+    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 }   // end online Server test

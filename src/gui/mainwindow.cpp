@@ -60,6 +60,17 @@ MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
     if (serverVar.isValid())
         TdApi::convertFromSerialisation(serverVar.toMap(), m_servers);
 
+    // Connect up the error signal of our servers to a slot that displays
+    // the error in a message box
+    for (auto server : m_servers)
+    {
+        connect(
+            server.get(),
+            &TdApi::Server::errorOccurred,
+            this,
+            &MainWindow::serverErrorOccurred);
+    }
+
     setupUi();
 
 }   // end constructor
@@ -164,6 +175,20 @@ QWidget* MainWindow::setupLeftSplit(QWidget* parent)
     // TODO Consider whether we want to display the server instances all the
     // the time
     auto serversWidget = new TdGui::ServersWidget(m_servers, frame);
+
+    // When a new server is created, make sure its error signal is hooked up
+    // to our error display method.
+    connect(
+        serversWidget,
+        &TdGui::ServersWidget::newServerCreated,
+        [this](TdApi::ServerPtr newServer)
+        {
+            connect(
+                newServer.get(),
+                &TdApi::Server::errorOccurred,
+                this,
+                &MainWindow::serverErrorOccurred);
+        });
 
     // When the servers Widget updates the list of Servers, make sure the
     // info is written to persistent settings.

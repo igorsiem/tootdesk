@@ -248,7 +248,11 @@ class Server : public QObject
 
     signals:
 
-    void instanceInfoRetrieved(void);
+    void instanceInfoRetrieved(
+        QString instanceTitle,
+        QString instanceDescription);
+
+    void errorOccurred(QString serverName, QString errorMsg);
 
     // --- Internal Declaratons ---
 
@@ -366,6 +370,10 @@ class Server : public QObject
      */
     TaskQueue m_tasks;
 
+    /**
+     * \brief Used to notify the background thread that it needs to check
+     * the task queue (or wake up to terminate)
+     */
     QWaitCondition m_timeToCheckForTasks;
 
 };  // end Server class
