@@ -244,14 +244,37 @@ class Server : public QObject
 
     // -- Remote Operations --
 
+    /**
+     * \brief Retrieve the instance info for the Server from online, as a
+     * background task.
+     * 
+     * This method returns immediately, emitting `instanceInfoRetrieved`
+     * signal when it is complete, or `errorOccurred` if there was a problem.
+     */
     void retrieveInstanceInfo(void);
 
     signals:
 
+    /**
+     * \brief Signals that instance info for the Server has been retrieved
+     * from online
+     * 
+     * \param instanceTitle The title of the Server instance
+     * 
+     * \param instanceDescription A description of the instance
+     */
     void instanceInfoRetrieved(
         QString instanceTitle,
         QString instanceDescription);
 
+    /**
+     * \brief Signals that an error has ocurred while processing an online
+     * task
+     * 
+     * \param serverName The `name()` of the server
+     * 
+     * \param errorMsg A human-readable description of the error
+     */
     void errorOccurred(QString serverName, QString errorMsg);
 
     // --- Internal Declaratons ---
@@ -281,8 +304,28 @@ class Server : public QObject
 
     // -- Helper Functions --
 
+    /**
+     * \brief A simple background task-processing loop
+     * 
+     * This method is executed by the background thread of the Server. It
+     * sleeps until there is a task in the `m_tasks` queue (or it is time
+     * to destroy the Server). When there is a task in the queue, it is
+     * popped and executed.
+     * 
+     * All exceptions that occur when executing the tasks are caught and
+     * signalled using `errorOccurred`.
+     */
     void processTasks(void);
 
+    /**
+     * \brief Add a task to the worker queue for background processing
+     * 
+     * This method adds the given executable as a task in the queue for
+     * execution by the Server background thread, and then ensures that the
+     * thread is awake.
+     * 
+     * \param fn An executable object for background processing
+     */
     void enqueue(TaskFn fn);
 
     // -- Attributes --
@@ -301,8 +344,8 @@ class Server : public QObject
     std::atomic<bool> m_onlineOperationInProgress;
 
     /**
-     * \brief Flag indicating that the server is about to be destroyed - no
-     * new operations should be started
+     * \brief Flag indicating that the server is being destroyed - no further
+     * tasks will be processed (although existing tasks will be completed).
      */
     std::atomic<bool> m_shuttingDown;
 

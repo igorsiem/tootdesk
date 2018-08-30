@@ -212,8 +212,6 @@ void Server::processTasks(void)
         // down)
         WriteGuard tasksGrd(&m_tasksMtx);
 
-///        qDebug() << "thread about to sleep";
-
         if (m_tasks.empty() && (m_shuttingDown.load() == false))
             m_timeToCheckForTasks.wait(&m_tasksMtx);
 

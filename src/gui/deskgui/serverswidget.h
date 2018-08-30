@@ -64,23 +64,44 @@ class ServersWidget : public QWidget
     signals:
 
     /**
-     * \brief Signals that the Servers collection (for which the
-     * `ServersWidget` object has a reference) has been updated by this
+     * \brief Signals that the Servers collection has been updated by this
      * widget
      */
     void serversCollectionChanged(void);
 
+    /**
+     * \brief Signal that a new server has been created
+     * 
+     * \param server The newly created server object. Note that this
+     * *already* has been added to the `m_server` collection.
+     */
     void newServerCreated(Api::ServerPtr server);
 
     // --- Internal Declarations ---
 
     protected slots:
 
+    /**
+     * \brief Display the Instance data for a server when it has been
+     * retrieved
+     * 
+     * \param title The Instance Title
+     * 
+     * \param description A Description of the Instance
+     */
     void serverInstanceInfoRetrieved(QString title, QString description)
     {
         setInstanceInfo(title, description);
     }
 
+    /**
+     * \brief Display information about an error that has occurred with a
+     * Server
+     * 
+     * \param serverName The (user assigned) Name of the Server
+     * 
+     * \param errorMessage A human-readable error message 
+     */
     void serverErrorOccurred(QString serverName, QString errorMsg)
     {
         setInstanceInfoNone(tr("Error retrieving instance data: ") +
@@ -119,20 +140,65 @@ class ServersWidget : public QWidget
 
     // -- UI Setup Functions --
 
+    /**
+     * \brief Set up the Instance Information area widget
+     */
     void setupInstanceInfoWidget(void);
 
     // -- Helper Functions --
 
+    /**
+     * \brief Create a new Server object, adding  it to the `m_servers`
+     * collection
+     * 
+     * \param name A human-readable name for the Server
+     * 
+     * \param url The URL of the Server 
+     */
     void addNewServer(QString name, QString url);
 
+    /**
+     * \brief Clear the Instance Info widget area
+     */
     void clearInstanceInfo(void);
 
+    /**
+     * \brief Display a miscellaneous message in the Instance Info area when
+     * there is no other data to  display
+     */
     void setInstanceInfoNone(QString message);
 
+    /**
+     * \brief Display the Server's Instance data
+     * 
+     * \param instanceTitle The Title of the Instance
+     * 
+     * \param instanceDescription The Description of the Instance
+     */
     void setInstanceInfo(QString instanceTitle, QString instanceDescription);
 
+    /**
+     * \brief Show a 'waiting' animation in the Instance Info area
+     * 
+     * This method is called when a 'retrieve instance info' operation
+     * is taking place, and we are waiting for the result.
+     */
     void setInstanceInfoWaiting(void);
 
+    /**
+     * \brief Retrieve the server at the given index in the `m_servers`
+     * collection
+     * 
+     * This method counts through the `m_servers` collection from the
+     * beginning (it's a map), and so is a tad inefficient, but we assume
+     * that the collection of servers is 'small', so it's probably not a
+     * problem. 
+     * 
+     * \param index The index of the server to retrieve
+     * 
+     * \return A shared pointer to the Server, or `nullptr` if `index` is out
+     * of range
+     */
     Api::ServerPtr serverAtIndex(int index)
     {
         if ((index < 0) || (index >= m_servers.size())) return nullptr;
@@ -141,7 +207,7 @@ class ServersWidget : public QWidget
         for (int i = 0; i < index; i++) serverItr++;
 
         return serverItr.value();
-    }
+    }   // end serverAtIndex method
 
     // -- Attributes --
 
@@ -164,16 +230,36 @@ class ServersWidget : public QWidget
      */
     Gui::ServerTableModel* m_serverTableModel;
 
+    /**
+     * \brief A container widget for the Instance data area
+     */
     QWidget* m_instanceInfoWidget;
 
+    /**
+     * \brief The layout object for the Instance data area
+     */
     QFormLayout* m_instanceInfoLayout;
 
+    /**
+     * \brief A label for use when there is no Server selected
+     */
     QLabel* m_instanceInfoNoneLabel;
 
+    /**
+     * \brief A tuple of widgets for display when we are waiting for Instance
+     * info to be retrieved
+     */
     std::tuple<QMovie*, QLabel*> m_instanceInfoWaitingWidgets;
 
+    /**
+     * \brief Widgets for displaying Instance info
+     */
     std::tuple<QLabel*, QLabel*, QLabel*, QLabel*> m_instanceInfoDataWidgets;
 
+    /**
+     * \brief The meta-object connection that ensures that the Servers
+     * widget is notified when the Server has retrieved its instance info
+     */
     QMetaObject::Connection m_serverInstanceInfoConnection;
 
 };  // end ServersWidget class
