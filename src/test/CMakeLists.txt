@@ -19,7 +19,9 @@
 file (GLOB_RECURSE TEST_SRC *.cpp)
 add_executable(test-tootdesk
     ${TEST_SRC}
+    ../gui/deskapi/account.cpp
     ../gui/deskapi/server.cpp
+    ../gui/deskapi/status.cpp
 )
 
 # Comment out these lines to alllow console debug / warning output in tests

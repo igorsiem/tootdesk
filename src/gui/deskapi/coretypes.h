@@ -93,5 +93,16 @@ using WriteGuard = QWriteLocker;
     using TypeName##Ptr = ::TootDesk::Api::SharedPtr<TypeName>; \
     using Const##TypeName##Ptr = ::TootDesk::Api::SharedPtr<const TypeName>;
 
+#define TD_DISABLE_COPY_SEMANTICS_FOR( TypeName ) \
+    TypeName(const TypeName&) = delete; \
+    TypeName& operator=(const TypeName&) = delete;
+
+#define TD_DISABLE_MOVE_SEMANTICS_FOR( TypeName ) \
+    TypeName(TypeName&&) = delete; \
+    TypeName& operator=(TypeName&&) = delete;
+
+#define TD_DISABLE_COPY_AND_MOVE_SEMANTICS_FOR( TypeName ) \
+    TD_DISABLE_COPY_SEMANTICS_FOR(TypeName) \
+    TD_DISABLE_MOVE_SEMANTICS_FOR(TypeName)
 
 #endif

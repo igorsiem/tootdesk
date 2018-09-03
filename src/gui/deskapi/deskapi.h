@@ -23,11 +23,13 @@
  * \copyright GPL 3.0
  */
 
+#include "account.h"
 #include "error.h"
 #include "lambdarunnable.h"
 #include "mastodonerror.h"
 #include "mastodontypes.h"
 #include "server.h"
+#include "status.h"
 
 #ifndef _td_gui_deskapi_deskapi_h_included
 #define _td_gui_deskapi_deskapi_h_included

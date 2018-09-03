@@ -15,7 +15,7 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file lambdarunnable.h
+ * \file mastodontypes.h
  * Declares some types related to Mastodon-cpp
  *
  * \author Igor Siemienowicz
@@ -23,30 +23,30 @@
  * \copyright GPL 3.0
  */
 
-#include <memory>
+///#include <memory>
 
-#include <QMetaType>
+///#include <QMetaType>
 
-#include <mastodon-cpp/mastodon-cpp.hpp>
-#include <mastodon-cpp/easy/all.hpp>
+///#include <mastodon-cpp/mastodon-cpp.hpp>
+///#include <mastodon-cpp/easy/all.hpp>
 
-#ifndef _td_gui_mastodontypes_h_included
-#define _td_gui_mastodontypes_h_included
+#ifndef _td_gui_deskapi_mastodontypes_h_included
+#define _td_gui_deskapi_mastodontypes_h_included
 
 /**
  * \brief The mastodon status class
  */
-using status_t = Mastodon::Easy::Easy::Status;
+///using status_t = Mastodon::Easy::Easy::Status;
 
 /**
  * \brief A shared pointer to a status object
  */
-using StatusPtr = std::shared_ptr<status_t>;
+///using StatusPtr = std::shared_ptr<status_t>;
 
 /**
  * \brief A shared pointer to a const status object
  */
-using ConstStatusPtr = std::shared_ptr<const status_t>;
+///using ConstStatusPtr = std::shared_ptr<const status_t>;
 
 ///// Set up Qt metatypes for a status pointer
 ///Q_DECLARE_METATYPE(StatusPtr);
