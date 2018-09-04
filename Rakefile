@@ -204,7 +204,7 @@ namespace :test do
     end
 
     task :all => :bin do
-        cmd_line = test_dir + "/" + test_exe_file_name
+        cmd_line = test_dir + "/" + test_exe_file_name + " -d yes"
         sh cmd_line
     end
 

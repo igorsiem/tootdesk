@@ -49,6 +49,7 @@ Server::Server(QString name, QUrl url, QObject* parent) :
     , m_workerThread(nullptr)
     , m_tasksMtx()
     , m_tasks()
+    , m_taskInProgress(false)
     , m_timeToCheckForTasks()
 {
     if (!isValid()) qWarning() << "Server address" << url.toString() <<
@@ -163,19 +164,19 @@ void Server::retrieveInstanceInfo(void)
     enqueue([this](void)
     {
 
-        qDebug() << "starting retrieve instance info task -" <<
+        qDebug() << "commencing 'retrieve instance info' task -" <<
             QString::fromStdString(mastodonAddress());
-
-        m_onlineOperationInProgress = true;
 
         Mastodon::Easy masto(mastodonAddress(), "");    // no need to auth
         std::string response;
 
-        m_onlineOperationInProgress = false;
-
         // Get the info, checking for errors
         qDebug() << "    " << name() << "commencing get...";
+
+        m_onlineOperationInProgress = true;
         auto result = masto.get(Mastodon::API::v1::instance, response);
+        m_onlineOperationInProgress = false;
+
         if (result) MastodonError(result).raise();
         qDebug() << "    ... " << name() << "get completed";
 
@@ -192,12 +193,50 @@ void Server::retrieveInstanceInfo(void)
             m_instanceTitle,
             m_instanceDescription);
 
-        qDebug() << "finished retrieve instance info task -" <<
+        qDebug() << "completed 'retrieve instance info' task -" <<
             QString::fromStdString(mastodonAddress());
 
     });
 
 }   // end retrieveInstanceInfo
+
+void Server::retrievePublicTimeline(StatusProcessorFn processStatus)
+{
+
+    enqueue([this, processStatus](void)
+    {
+        qDebug() << "commencing 'retrieve public timeline' task -" <<
+            QString::fromStdString(mastodonAddress());
+        
+        Mastodon::Easy masto(mastodonAddress(), "");    // no need to auth
+        std::string response;
+
+        // Get the info, checking for errors
+        qDebug() << "    " << name() << "commencing get...";
+
+        m_onlineOperationInProgress = true;
+        auto result =
+            masto.get(Mastodon::API::v1::timelines_public, response);
+        m_onlineOperationInProgress = false;
+
+        if (result) MastodonError(result).raise();
+        qDebug() << "    ... " << name() << "get completed";
+
+        // Loop through the response items, processing each as a status
+        // object.
+        for (const std::string& statusStr :
+            Mastodon::Easy::json_array_to_vector(response))
+        {
+            // Generate the status object from the JSON string, and pass
+            // it to the handler function,
+            auto status = makeShared<Status>(statusStr);
+            processStatus(status);
+        }   // end status loop
+
+        qDebug() << "completed 'retrieve public timeline' task -" <<
+            QString::fromStdString(mastodonAddress());
+    });
+}   // end retrievePublicTimeline
 
 void Server::processTasks(void)
 {
@@ -228,7 +267,9 @@ void Server::processTasks(void)
         // qCritical).
         try
         {
+            m_taskInProgress = true;
             std::get<0>(*task)();
+            m_taskInProgress = false;
         }
         catch (const Error& error)
         {

@@ -24,6 +24,7 @@
  */
 
 #include <QDateTime>
+#include <QVector>
 
 #include <mastodon-cpp/mastodon-cpp.hpp>
 #include <mastodon-cpp/easy/all.hpp>
@@ -165,6 +166,11 @@ class Status
 };  // end Status class
 
 TD_DECLARE_SHARED_POINTERS_FOR(Status)
+
+/**
+ * \brief A vector of shared pointers to Status items
+ */
+using StatusVector = QVector<StatusPtr>;
 
 }}  // end TootDesk::Api namespace
 

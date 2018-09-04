@@ -143,7 +143,7 @@ TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
 }   // end Server serialisation test
 
 TEST_CASE("TootDesk::Api::Server serialisation online operations",
-        "[unit]tdapi][online]")
+        "[unit]tdapi][online][current]")
 {
     TdApi::Server server("http://mastodon.social");
 
@@ -155,9 +155,11 @@ TEST_CASE("TootDesk::Api::Server serialisation online operations",
     REQUIRE(!server.onlineOperationInProgress());
     REQUIRE(!server.instanceDataIsCurrent());
     
+    // Request the instance info, then wait until all work is done.
     server.retrieveInstanceInfo();
-    while (server.instanceDataIsCurrent() == false)
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    while (!server.nothingToDo())
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     // Now, sever has valid instance data
     REQUIRE(!server.onlineOperationInProgress());
@@ -180,5 +182,29 @@ TEST_CASE("TootDesk::Api::Server serialisation online operations",
     // TdApi::Server invalidServer("http://abc.xyz");
     // invalidServer.retrieveInstanceInfo();
     // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    // Retrieve the public timeline of the server
+    TdApi::StatusVector statuses;
+    TdApi::Mutex statusesMtx;
+
+    server.retrievePublicTimeline(
+        [&statuses, &statusesMtx](TdApi::StatusPtr status)
+        {
+            TdApi::WriteGuard grd(&statusesMtx);
+            statuses.push_back(status);
+        });
+
+    // Wait until the server is done
+    while (!server.nothingToDo())
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // std::cout
+    //     << std::endl << "[DEBUG] number of statuses retrieved: " <<
+    //         statuses.size()
+    //     << std::endl;
+
+    // Make sure we got some statuses, and that all of them are valid.
+    REQUIRE(statuses.size() > 0);
+    for (auto status : statuses) REQUIRE(status->isValid());
 
 }   // end online Server test

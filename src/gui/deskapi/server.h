@@ -39,6 +39,7 @@
 #include <QWaitCondition>
 
 #include "coretypes.h"
+#include "status.h"
 
 #ifndef _td_gui_deskapi_server_h_included
 #define _td_gui_deskapi_server_h_included
@@ -222,6 +223,37 @@ class Server : public QObject
         { return m_onlineOperationInProgress.load(); }
 
     /**
+     * \brief Retrieve the size of the tasks queue
+     * 
+     * \return The number of tasks waiting in the queue, not counting any
+     * task that is currently being executed
+     */
+    int taskQueueSize(void) const
+    {
+        ReadGuard grd(&m_tasksMtx);
+        return m_tasks.size();
+    }
+
+    /**
+     * \brief Whether or not a background task is currently in progress
+     * 
+     * \return `true` if a background tasks is in progress
+     */
+    bool taskInProgress(void) const { return m_taskInProgress.load(); }
+
+    /**
+     * \brief Checks whether the Server has a task in progress OR any tasks
+     * waiting to be executed in a single, atomic operation
+     * 
+     * \return `true` if the Server is idle
+     */
+    bool nothingToDo(void) const
+    {
+        ReadGuard grd(&m_tasksMtx);
+        return ((m_tasks.size() == 0) && (m_taskInProgress.load() == false));
+    }   // end nothingToDo
+
+    /**
      * \brief Retrieve flag indicating whether instance data is current
      * 
      * Instance data is retrieved from the server (using the
@@ -253,6 +285,32 @@ class Server : public QObject
      */
     void retrieveInstanceInfo(void);
 
+    /**
+     * \brief A callable object that processes a `Status` object in some way
+     */
+    using StatusProcessorFn = std::function<void(StatusPtr)>;
+
+    /**
+     * \brief Retrieve the public timeline for the Server, as a background
+     * task
+     * 
+     * This method returns immediateley, having queued the retrieval task for
+     * handling by the background thread. The retrieved status items are
+     * passed to the supplied processing function (`processStatus`).
+     * 
+     * Note that `processStatus` is called from the background thread, so
+     * should not take any action that relies on affinity with the main
+     * process thread (i.e. most `QObject` instances have affinity with the
+     * main thread). In most cases like this, the best thing to do is emit
+     * a signal from `processStatus` and have the connected slot take care of
+     * actions that must be exected on the main thread.
+     * 
+     * \param processStatus The callable object that is invoked to process
+     * each `Status` object; this is called from the Server's background
+     * thread
+     */
+    void retrievePublicTimeline(StatusProcessorFn processStatus);
+    
     signals:
 
     /**
@@ -412,6 +470,12 @@ class Server : public QObject
      * \brief The queue of tasks for background execution
      */
     TaskQueue m_tasks;
+
+    /**
+     * \brief Whether or not a task is currently being executed by the
+     * background thread
+     */
+    std::atomic<bool> m_taskInProgress;
 
     /**
      * \brief Used to notify the background thread that it needs to check
