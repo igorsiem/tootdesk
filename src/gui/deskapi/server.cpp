@@ -236,7 +236,46 @@ void Server::retrievePublicTimeline(StatusProcessorFn processStatus)
         qDebug() << "completed 'retrieve public timeline' task -" <<
             QString::fromStdString(mastodonAddress());
     });
+
 }   // end retrievePublicTimeline
+
+void Server::retrievePublicTimeline(StatusVectorProcessorFn process)
+{
+
+    enqueue([this, process](void)
+    {
+
+        qDebug() << "commencing 'retrieve public timeline' task -" <<
+            QString::fromStdString(mastodonAddress());
+        
+        Mastodon::Easy masto(mastodonAddress(), "");    // no need to auth
+        std::string response;
+
+        // Get the info, checking for errors
+        qDebug() << "    " << name() << "commencing get...";
+
+        m_onlineOperationInProgress = true;
+        auto result =
+            masto.get(Mastodon::API::v1::timelines_public, response);
+        m_onlineOperationInProgress = false;
+
+        if (result) MastodonError(result).raise();
+        qDebug() << "    ... " << name() << "get completed";
+
+        StatusVector statuses;
+        for (const std::string& statusStr :
+                Mastodon::Easy::json_array_to_vector(response))
+            statuses.push_back(
+                makeShared<Status>(statusStr));
+
+        process(statuses);
+
+        qDebug() << "completed 'retrieve public timeline' task -" <<
+            QString::fromStdString(mastodonAddress());
+
+    });
+
+}   // end retrievePublicTimeline method
 
 void Server::processTasks(void)
 {

@@ -43,6 +43,8 @@ namespace TootDesk { namespace Api {
  * All of the traditional caveats associated with using callable objects,
  * functions and lambdas apply here. The "run function" cannot be changed
  * after construction.
+ * 
+ * \todo Consider deprecating this task - we may not use it at all
  */
 class LambdaRunnable : public QRunnable
 {

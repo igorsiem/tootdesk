@@ -142,7 +142,7 @@ TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
 
 }   // end Server serialisation test
 
-TEST_CASE("TootDesk::Api::Server serialisation online operations",
+TEST_CASE("TootDesk::Api::Server online operations",
         "[unit]tdapi][online][current]")
 {
     TdApi::Server server("http://mastodon.social");
@@ -204,6 +204,21 @@ TEST_CASE("TootDesk::Api::Server serialisation online operations",
     //     << std::endl;
 
     // Make sure we got some statuses, and that all of them are valid.
+    REQUIRE(statuses.size() > 0);
+    for (auto status : statuses) REQUIRE(status->isValid());
+
+    // Now try retrieving the public timeline in a single container
+    statuses.clear();
+    server.retrievePublicTimeline(
+        [&statuses](TdApi::StatusVector& s)
+        {
+            statuses = s;
+        });
+
+    while (!server.nothingToDo())
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Make sure we got some more statuses, and that all of them are valid.
     REQUIRE(statuses.size() > 0);
     for (auto status : statuses) REQUIRE(status->isValid());
 

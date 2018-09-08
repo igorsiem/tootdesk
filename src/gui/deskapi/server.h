@@ -291,11 +291,16 @@ class Server : public QObject
     using StatusProcessorFn = std::function<void(StatusPtr)>;
 
     /**
+     * \brief  A callable object that processes a vector of Status objects
+     */
+    using StatusVectorProcessorFn = std::function<void(StatusVector&)>;
+
+    /**
      * \brief Retrieve the public timeline for the Server, as a background
      * task
      * 
      * This method returns immediateley, having queued the retrieval task for
-     * handling by the background thread. The retrieved status items are
+     * handling by the background thread. The retrieved Status items are
      * passed to the supplied processing function (`processStatus`).
      * 
      * Note that `processStatus` is called from the background thread, so
@@ -310,6 +315,19 @@ class Server : public QObject
      * thread
      */
     void retrievePublicTimeline(StatusProcessorFn processStatus);
+
+    /**
+     * \brief Retrieve the public timeline for the Server as a background
+     * task
+     * 
+     * This method  returns immediately, having queues the retrieval task for
+     * handling by the background thread. The retrieved Status items are
+     * passed in a single vector to the supplied `process` function, which is
+     * called from the background thread.
+     * 
+     * \param processStatus The callable object that is invoked
+     */
+    void retrievePublicTimeline(StatusVectorProcessorFn process);
     
     signals:
 

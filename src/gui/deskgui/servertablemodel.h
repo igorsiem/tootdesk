@@ -38,10 +38,17 @@ namespace TootDesk { namespace Gui {
 class ServerTableModel : public QAbstractTableModel
 {
     
-    // --- Externla Interface ---
+    // --- External Interface ---
 
     public:
 
+    /**
+     * \brief Constructor - initalises internal attributes
+     * 
+     * \param servers The externally-maintained collection of servers
+     * 
+     * \param parent The parent object (if any)
+     */
     explicit ServerTableModel(
         Api::ServerByNameMap& servers,
         QObject* parent = nullptr);
@@ -119,7 +126,6 @@ class ServerTableModel : public QAbstractTableModel
      * has finished changing
      */
     void endServerCollectionChange(void) { endResetModel(); }
-
 
     // --- Internal Declarations ---
 
