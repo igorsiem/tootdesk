@@ -37,8 +37,6 @@
 ///#include <QThreadPool>
 ///#include <QVBoxLayout>
 
-#include <deskgui/deskgui.h>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -46,13 +44,12 @@
 ///#include "statuswidget.h"
 ///#include "timelinewidget.h"
 
-namespace TdGui = Td::Gui;
-
 MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
     QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_settings(settings)
     , m_servers()
+    , m_selectedServer(nullptr)
 {
 
     // Retrieve servers info from persistent settings
@@ -128,6 +125,35 @@ void MainWindow::setupCentralWidget(void)
     // TODO set up a proper right side of the window
     auto rightFrame = new QFrame(this);
     rightFrame->setFrameShape(QFrame::StyledPanel);
+
+    rightFrame->setLayout(new QVBoxLayout(rightFrame));
+    auto getTimelineButton = new QPushButton(tr("Get"), rightFrame);
+    rightFrame->layout()->addWidget(getTimelineButton);
+
+    auto timeline = new TdGui::StatusListWidget(rightFrame);
+    rightFrame->layout()->addWidget(timeline);
+
+    connect(
+        getTimelineButton,
+        &QPushButton::clicked,
+        [this, timeline](bool)
+        {
+            qDebug() << "button pushed";
+
+            if (m_selectedServer)
+            {
+                qDebug() << "server" << m_selectedServer->name() <<
+                    "selected";
+
+                m_selectedServer->retrievePublicTimeline(
+                    [this, timeline](TdApi::StatusVector& statusItems)
+                    {
+                        timeline->setStatusItems(statusItems);
+                    });
+            }
+            else qDebug() << "no server selected";
+        });
+
     mainSplitter->addWidget(rightFrame);
 
     // Set up the geometry of the main splitter - getting it from persistent
@@ -201,6 +227,17 @@ QWidget* MainWindow::setupLeftSplit(QWidget* parent)
                 TdApi::convertForSerialisation(m_servers);
             m_settings.setValue("servers", serialisableServerInfo);
         });
+
+    // When a server is selected, make sure we know about it
+    connect(
+        serversWidget,
+        &TdGui::ServersWidget::serverSelected,
+        [this](TdApi::ServerPtr server)
+        {
+            m_selectedServer = server;
+        });
+
+    m_selectedServer = serversWidget->selectedServer();
 
     frame->layout()->addWidget(serversWidget);
 

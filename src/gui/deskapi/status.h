@@ -172,6 +172,8 @@ TD_DECLARE_SHARED_POINTERS_FOR(Status)
  */
 using StatusVector = QVector<StatusPtr>;
 
+TD_DECLARE_SHARED_POINTERS_FOR(StatusVector)
+
 }}  // end TootDesk::Api namespace
 
 #endif

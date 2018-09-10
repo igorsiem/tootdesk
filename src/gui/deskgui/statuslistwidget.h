@@ -15,30 +15,55 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file deskgui.h
- * Include all DeskGui declarations
+ * \file statuslistwidget.h
+ * Declares the StatusListWidget class
  *
  * \author Igor Siemienowicz
  *
  * \copyright GPL 3.0
  */
 
-#include "errorhandling.h"
-#include "servertablemodel.h"
-#include "serverswidget.h"
-#include "statuslistwidget.h"
+#include <QListWidget>
+#include "../deskapi/status.h"
 
-#ifndef _td_gui_deskgui_h_included
-#define _td_gui_deskgui_h_included
+#ifndef _td_gui_deskgui_statuslistwidget_h_included
+#define _td_gui_deskgui_statuslistwidget_h_included
 
-namespace TootDesk {
+namespace TootDesk { namespace Gui {
 
-/**
- * \brief Namespace for TootDesk GUI-related declarations
- */
-namespace Gui {
+class StatusListWidget : public QListWidget
+{
+
+    Q_OBJECT
+
+    // --- External Interface ---
+
+    public:
+
+    StatusListWidget(QWidget* parent = nullptr);
+
+    virtual ~StatusListWidget(void) = default;
+
+    void setStatusItems(Api::StatusVector statusItems);
+
+    signals:
+    
+    void statusItemsUpdated(void);
+
+    // --- Internal Declarations ---
+
+    protected slots:
+
+    void refillStatusItemsList(void);
+
+    protected:
+
+    Api::StatusVectorPtr m_statusItems;
+
+    mutable Api::Mutex m_statusItemsMtx;
+
+};  // end StatusListWidget class
 
 }}  // end TootDesk::Gui namespace
 
 #endif
-

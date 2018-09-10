@@ -33,7 +33,9 @@
 ///#include <mastodon-cpp/mastodon-cpp.hpp>
 ///#include <mastodon-cpp/easy/all.hpp>
 
-#include "deskapi/deskapi.h"
+#include <deskapi/deskapi.h>
+#include <deskgui/deskgui.h>
+
 
 ///#include "timelinewidget.h"
 
@@ -46,6 +48,7 @@ class MainWindow;
 
 namespace Td = TootDesk;
 namespace TdApi = Td::Api;
+namespace TdGui = Td::Gui;
 
 /**
  * \brief Encapsulates the main GUI window
@@ -122,7 +125,7 @@ class MainWindow : public QMainWindow
      *
      * \return The new widget containing Servers table
      */
-    QWidget* createServersTableWidget(QWidget* parent);
+///    QWidget* createServersTableWidget(QWidget* parent);
 
 ///    QFrame* createTimelineFrame(const QString& title, QWidget* parent);
 
@@ -172,6 +175,13 @@ class MainWindow : public QMainWindow
      * \brief The collection of Server instances
      */
     TdApi::ServerByNameMap m_servers;
+
+    /**
+     * \brief The server that is currently selected for UI operations
+     * 
+     * This may be `nullptr`.
+     */
+    TdApi::ServerPtr m_selectedServer;
 
 ///    TimelineWidget* m_timelineWidget;
 

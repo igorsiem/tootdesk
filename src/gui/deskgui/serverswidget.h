@@ -61,6 +61,21 @@ class ServersWidget : public QWidget
         Api::ServerByNameMap& servers,
         QWidget* parent = nullptr);
 
+    /**
+     * \brief Retrieve the currently selected Server object
+     * 
+     * \return A shared pointer to the currently selected server object
+     */
+    Api::ServerPtr selectedServer(void)
+    {
+        // Get the index of the selected row in the table
+        auto selRows = m_serverTableView->selectionModel()->selectedRows();
+        if (selRows.size() == 0) return nullptr;
+        int selRow = selRows[0].row();
+
+        return serverAtIndex(selRow);
+    }   // end selectedServer method
+
     signals:
 
     /**
@@ -76,6 +91,13 @@ class ServersWidget : public QWidget
      * *already* has been added to the `m_server` collection.
      */
     void newServerCreated(Api::ServerPtr server);
+
+    /**
+     * \brief A Server has been selected by the User
+     * 
+     * \param server The selected Server
+     */
+    void serverSelected(Api::ServerPtr server);
 
     // --- Internal Declarations ---
 

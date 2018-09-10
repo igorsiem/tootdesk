@@ -23,14 +23,14 @@
  * \copyright GPL 3.0
  */
 
-#include "statustablemodel.h"
+#include "statuslistmodel.h"
 
 namespace TootDesk { namespace Gui {
 
 StatusTableModel::StatusTableModel(
         Api::StatusVector statuses,
         QObject* parent) :
-    QAbstractTableModel(parent)
+    QAbstractListModel(parent)
     , m_statuses(std::move(statuses))
     , m_statusesMtx()
 {
@@ -51,29 +51,29 @@ QVariant StatusTableModel::data(const QModelIndex& index, int role) const
 
     Api::ReadGuard grd(&m_statusesMtx);
 
+    // Make sure the row is in range, then extract the Status item
     if ((index.row() < 0)
-            || (index.row() >= m_statuses.size())
-            || (index.column() < 0)
-            || (index.column() >= columnCount()))
+            || (index.row() >= m_statuses.size()))
         return QVariant();
 
     auto status = m_statuses[index.row()];
 
-    return toData(
-        *status,
-        toStatusColumnType(index.column()));
+    // Convert the status item to a list of variant data containing the
+    // attributes of the Status object, ordered by the StatusColumnType
+    // enumeration
+    return toDataList(*status);
 }   // end data method
 
-QVariant StatusTableModel::headerData(
-        int section,
-        Qt::Orientation orientation,
-        int role) const
-{
-    if (orientation != Qt::Horizontal) return QVariant();
-    if (role != Qt::DisplayRole) return QVariant();
-
-    return toString(toStatusColumnType(section));
-}   // end headerData
+///QVariant StatusTableModel::headerData(
+///        int section,
+///        Qt::Orientation orientation,
+///        int role) const
+///{
+///    if (orientation != Qt::Horizontal) return QVariant();
+///    if (role != Qt::DisplayRole) return QVariant();
+///
+///    return toString(toStatusColumnType(section));
+///}   // end headerData
 
 void StatusTableModel::setData(Api::StatusVector statuses)
 {
@@ -115,6 +115,15 @@ QVariant StatusTableModel::toData(
     }   // switch on SCT
 
 }   // end toData
+
+QList<QVariant> StatusTableModel::toDataList(const Api::Status& status)
+{
+    QList<QVariant> dataList;
+    for (int i = 0; i < toInt(LastStatusColumnType); i++)
+        dataList.push_back(toData(status, toStatusColumnType(i)));
+
+    return std::move(dataList);
+}   // end toDataList
 
 QString StatusTableModel::toString(StatusColumnType sct)
 {

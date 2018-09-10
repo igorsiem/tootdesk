@@ -23,7 +23,10 @@
  * \copyright GPL 3.0
  */
 
-#include <QAbstractTableModel>
+#include <QAbstractListModel>
+#include <QList>
+#include <QVariant>
+
 #include "../deskapi/status.h"
 
 #ifndef _td_gui_deskgui_statustablemodel_h_included
@@ -34,8 +37,11 @@ namespace TootDesk { namespace Gui {
 /**
  * \brief A Qt table data model for interacting with collections of Status
  * data
+ * 
+ * \todo This class is deprecated, because we will use a QListWidget instead
+ * of a QListView.
  */
-class StatusTableModel : public QAbstractTableModel
+class StatusTableModel : public QAbstractListModel
 {
 
     // --- External Interface ---
@@ -79,22 +85,10 @@ class StatusTableModel : public QAbstractTableModel
      * 
      * \return The number of Status column
      */
-    virtual int columnCount(
-            const QModelIndex& parent = QModelIndex()) const override
-        { return toInt(LastStatusColumnType)+1; }
+///    virtual int columnCount(
+///            const QModelIndex& parent = QModelIndex()) const override
+///        { return toInt(LastStatusColumnType)+1; }
 
-    /**
-     * \brief Retrieve an item of status data
-     * 
-     * This method retrieves a data item for the given row (Status) and
-     * column (Status attribute).
-     * 
-     * \param index The model index of the data to retrieve; includes the
-     * row and column identifying the Status and attribute
-     * 
-     * \param role The role of the data item; in this implementation, we
-     * only support the Display role
-     */
     virtual QVariant data(
         const QModelIndex& index,
         int role = Qt::DisplayRole) const override;
@@ -113,10 +107,10 @@ class StatusTableModel : public QAbstractTableModel
      * \param role The display role; we only retrieve information for 
      * the Display Role in this read-only implementation
      */
-    virtual QVariant headerData(
-        int section,
-        Qt::Orientation orientation,
-        int role = Qt::DisplayRole) const override;
+///    virtual QVariant headerData(
+///        int section,
+///        Qt::Orientation orientation,
+///        int role = Qt::DisplayRole) const override;
 
     /**
      * \brief Set the status items in the data data
@@ -176,6 +170,8 @@ class StatusTableModel : public QAbstractTableModel
         { return static_cast<StatusColumnType>(i); }
 
     static QVariant toData(const Api::Status& status, StatusColumnType sct);
+
+    static QList<QVariant> toDataList(const Api::Status& status);
 
     /**
      * \brief Convert the given Status Column Type to a human-readable string

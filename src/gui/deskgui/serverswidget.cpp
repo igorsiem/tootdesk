@@ -255,8 +255,7 @@ ServersWidget::ServersWidget(
             TD_ACTION_CATCH_ALL_FROM(tr("Delete Server"))
         });
 
-    // Action when selection is changed - we want to populate the Instance
-    // Info section
+    // Action when selection is changed - emit the `serverSelected` signal
     connect(
         m_serverTableView->selectionModel(),
         &QItemSelectionModel::currentRowChanged,
@@ -270,7 +269,16 @@ ServersWidget::ServersWidget(
                 disconnect(m_serverInstanceInfoConnection);
 
             auto server = serverAtIndex(current.row());
+            emit serverSelected(server);
+        });
 
+    // When the server is selected, retrieve its instance data from online
+    // (if we need to).
+    connect(
+        this,
+        &ServersWidget::serverSelected,
+        [this](Api::ServerPtr server)
+        {
             if (server)
             {
                 // Only retrieve the instance data from online if we need to.
