@@ -26,9 +26,11 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTableView>
+#include <QThreadPool>
 #include <QToolBar>
 #include <QVBoxLayout>
 
+#include "../deskapi/lambdarunnable.h"
 #include "errorhandling.h"
 #include "serverdialog.h"
 #include "serverswidget.h"
@@ -248,6 +250,17 @@ ServersWidget::ServersWidget(
                     m_serverTableModel->endServerCollectionChange();
 
                     setInstanceInfoNone(tr("No Server selected"));
+
+                    // Do the final deletion of the Server object in the
+                    // background, in case it has an online task running
+                    // (and may therefore take a while)
+                    QThreadPool::globalInstance()->start(
+                        new Api::LambdaRunnable([selectedServer](void)
+                        {
+                            qDebug() << "deleting" <<
+                                selectedServer->name() << "in the "
+                                "background";
+                        }));
 
                     emit serversCollectionChanged();
                 }

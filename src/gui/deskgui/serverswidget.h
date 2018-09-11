@@ -41,6 +41,17 @@
 
 namespace TootDesk { namespace Gui {
 
+/**
+ * \brief A widget for managing the collection of Servers in TootDesk
+ * 
+ * This widget takes a reference to the collection of Servers maintained by
+ * the system, and exposes functionality for basic CRUD operations on the
+ * list, and also for displaying the Instance information for any server.
+ * 
+ * While each Server object includes thread-safety measures for executing
+ * online operations in the background, this widget does not. All basic
+ * operations on the collection of Servers are conducted on the main thread.
+ */
 class ServersWidget : public QWidget
 {
 

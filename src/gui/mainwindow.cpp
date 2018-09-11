@@ -23,9 +23,7 @@
  * \copyright GPL 3.0
  */
 
-///#include <sstream>
 #include <QDebug>
-///#include <QException>
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -34,15 +32,9 @@
 #include <QPushButton>
 #include <QSplitter>
 #include <QTableView>
-///#include <QThreadPool>
-///#include <QVBoxLayout>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-///#include "lambdarunnable.h"
-///#include "statuswidget.h"
-///#include "timelinewidget.h"
 
 MainWindow::MainWindow(QSettings& settings, QWidget *parent) :
     QMainWindow(parent)
@@ -178,14 +170,6 @@ void MainWindow::setupCentralWidget(void)
             m_settings.endGroup();
         });
 
-///    // Create two timeline frames
-///    //
-///    auto tf1 = createTimelineFrame("Federated Timeline", ui->centralWidget);
-///    ui->centralWidget->layout()->addWidget(tf1);
-///
-///    auto tf2 = createColumnFrame(ui->centralWidget);
-///    ui->centralWidget->layout()->addWidget(tf2);
-
 }   // end setupCentralWidget method
 
 QWidget* MainWindow::setupLeftSplit(QWidget* parent)
@@ -244,81 +228,3 @@ QWidget* MainWindow::setupLeftSplit(QWidget* parent)
     return frame;
 
 }   // end setupLeftSplit
-
-///QFrame* MainWindow::createTimelineFrame(
-///        const QString& title,
-///        QWidget* parent)
-///{
-///
-///    // Create the frame and a layout for it.
-///    QFrame* frame = createColumnFrame(parent);
-///
-///    auto label = new QLabel(frame);
-///    label->setText(title);
-///    frame->layout()->addWidget(label);
-///
-///    auto addressWidget = new SimpleAddressWidget(
-///       "Go",
-///       [this](const QString& address)
-///       {
-///            m_timelineWidget->clear();
-///
-///            QThreadPool::globalInstance()->start(
-///                new LambdaRunnable(
-///                    [this,&address](void)
-///                    {
-///                        getPublicTimeline(address.toStdString(),
-///                            [this](ConstStatusPtr status)
-///                            {
-///                                emit(statusDecoded(status));
-///                            });
-///                    }));           
-///       },
-///       frame);
-///
-///    frame->layout()->addWidget(addressWidget);
-///
-///    // auto scrollArea = new QScrollArea(frame);
-///    // auto listWidget = new 
-///    m_timelineWidget = new TimelineWidget(frame);
-///
-///    connect(
-///        this,
-///        SIGNAL(statusDecoded(ConstStatusPtr)),
-///        m_timelineWidget,
-///        SLOT(add(ConstStatusPtr)));
-///
-///    frame->layout()->addWidget(m_timelineWidget);
-///
-///    return frame;
-///
-///}   // end createTimelineFrame
-
-///QFrame* MainWindow::createColumnFrame(QWidget* parent)
-///{
-///    auto frame = new QFrame(parent);
-///    frame->setMinimumSize(500, 500);
-///    frame->setLayout(new QVBoxLayout());
-///
-///    return frame;
-///}   // end createColumnFrame
-
-///void MainWindow::getPublicTimeline(
-///        const std::string& address,
-///        StatusProcessorFn processorFn)
-///{
-///    using Mastodon::Easy;
-///    Easy masto(address, "");
-///
-///    std::string response;
-///    masto.get(Mastodon::API::v1::timelines_public, response);
-///
-///    for (const std::string& str :
-///            Mastodon::Easy::Easy::json_array_to_vector(response))
-///
-///    {
-///        // Easy::Status status(str);
-///        auto status = std::make_shared<status_t>(str);
-///        processorFn(status);
-///    }
-///}   // end getPublicTimeline

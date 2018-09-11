@@ -23,7 +23,9 @@
  * \copyright GPL 3.0
  */
 
+#include <QListWidgetItem>
 #include "statuslistwidget.h"
+#include "statuswidget.h"
 
 namespace TootDesk { namespace Gui {
 
@@ -61,7 +63,13 @@ void StatusListWidget::refillStatusItemsList(void)
     {
         for (auto status : *m_statusItems)
         {
-            addItem(status->content());
+            // addItem(status->content());
+            auto statusWidget = new StatusWidget(*status);
+
+            auto item = new QListWidgetItem(this);
+            item->setSizeHint(statusWidget->sizeHint());
+            addItem(item);
+            setItemWidget(item, statusWidget);
         }
     }   // end if we have some status items
 
