@@ -14,24 +14,20 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This cmake file specifies how to build the test-tootdesk executable
+# Cmake file for specifying how the GUI executable is built
 
-file (GLOB_RECURSE TEST_SRC *.cpp)
-add_executable(test-tootdesk
-    ${TEST_SRC}
-    ../gui/deskapi/account.cpp
-    ../gui/deskapi/server.cpp
-    ../gui/deskapi/status.cpp
-)
+# Sort out the UI files and their generated headers
+file(GLOB UI_FILES "*.ui")
+qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 
-# Comment out these lines to alllow console debug / warning output in tests
-add_definitions(-DQT_NO_DEBUG_OUTPUT)
-add_definitions(-DQT_NO_WARNING_OUTPUT)
+# Specify composition of gui application
+file(GLOB_RECURSE GUI_SRC *.cpp *.rc *.qrc)
+add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
 
-target_link_libraries(test-tootdesk
+target_link_libraries(tootdesk-gui
     Qt5::Widgets
-    ${CURL_LIB}
-    jsoncpp
     mastodon-cpp
     curlpp
+    ${CURL_LIB}
+    jsoncpp
 )

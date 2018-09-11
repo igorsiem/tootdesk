@@ -15,34 +15,41 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file test-main.cpp
- * Entry point for the test executable
- * 
+ * \file mastodontypes.h
+ * Declares some types related to Mastodon-cpp
+ *
  * \author Igor Siemienowicz
- * 
+ *
  * \copyright GPL 3.0
  */
 
-// #define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
-#include <gui/deskapi/server.h>
+///#include <memory>
+
+///#include <QMetaType>
+
+///#include <mastodon-cpp/mastodon-cpp.hpp>
+///#include <mastodon-cpp/easy/all.hpp>
+
+#ifndef _td_gui_deskapi_mastodontypes_h_included
+#define _td_gui_deskapi_mastodontypes_h_included
 
 /**
- * \brief Entry point to the CATCH-based test executable
- * 
- * \param argc The number of command-line arguments
- * 
- * \param argv The vector of command-line arguments
- * 
- * \return Non-zero on failure
+ * \brief The mastodon status class
  */
-int main( int argc, char* argv[] )
-{
-    // Register Qt metatypes
-    qRegisterMetaType<TootDesk::Api::ServerPtr>();
+///using status_t = Mastodon::Easy::Easy::Status;
 
-    // Run our tests
-    return Catch::Session().run( argc, argv );
-}   // end main function
+/**
+ * \brief A shared pointer to a status object
+ */
+///using StatusPtr = std::shared_ptr<status_t>;
 
+/**
+ * \brief A shared pointer to a const status object
+ */
+///using ConstStatusPtr = std::shared_ptr<const status_t>;
+
+///// Set up Qt metatypes for a status pointer
+///Q_DECLARE_METATYPE(StatusPtr);
+///Q_DECLARE_METATYPE(ConstStatusPtr);
+
+#endif

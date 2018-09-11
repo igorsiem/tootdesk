@@ -20,7 +20,22 @@ cmake_minimum_required(VERSION 3.10)
 project(tootdesk LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB -pthread")
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCURL_STATICLIB")
+
+# Qt Stuff
+# Run moc and RCC as needed
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+# Tell Cmake where to find Qt stuff
+set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)
+message("CMAKE_PREFIX_PATH set to '${CMAKE_PREFIX_PATH}'")
+
+# Find QtWidgets
+find_package(Qt5Widgets)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Find cURL manually for windows
 #
@@ -40,5 +55,6 @@ include_directories(
     $ENV{CURL_INCLUDE_DIR}      # only needed for Windows
 )
 
+add_subdirectory(gui)
 add_subdirectory(test)
 add_subdirectory(third-party)

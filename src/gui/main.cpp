@@ -15,34 +15,45 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file test-main.cpp
- * Entry point for the test executable
- * 
+ * \file main.cpp
+ * Entry point for the GUI executable
+ *
  * \author Igor Siemienowicz
- * 
+ *
  * \copyright GPL 3.0
  */
 
-// #define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
-#include <gui/deskapi/server.h>
+#include <QApplication>
+#include <QDebug>
+#include <QSettings>
+
+#include "mainwindow.h"
+///#include "mastodontypes.h"
 
 /**
- * \brief Entry point to the CATCH-based test executable
- * 
- * \param argc The number of command-line arguments
- * 
- * \param argv The vector of command-line arguments
- * 
- * \return Non-zero on failure
+ * @brief Entry point to the GUI executable
+ *
+ * @param argc The number of command-line arguments
+ *
+ * @param argv The vector of command-line arguments
+ *
+ * @return Non-zero on error
  */
-int main( int argc, char* argv[] )
+int main(int argc, char *argv[])
 {
-    // Register Qt metatypes
-    qRegisterMetaType<TootDesk::Api::ServerPtr>();
 
-    // Run our tests
-    return Catch::Session().run( argc, argv );
+///    // Declare our Qt metatypes
+///    qRegisterMetaType<StatusPtr>("StatusPtr");
+///    qRegisterMetaType<ConstStatusPtr>("ConstStatusPtr");
+
+    QApplication a(argc, argv);
+    QSettings settings("Igor Siemienowicz", "TootDesk");
+    MainWindow w(settings);
+    w.show();
+
+    auto result = a.exec();
+    qDebug() << __FUNCTION__ << "exiting with result" << result;
+    return result;
+    
 }   // end main function
 

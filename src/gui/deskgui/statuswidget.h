@@ -15,34 +15,46 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file test-main.cpp
- * Entry point for the test executable
- * 
+ * \file statuswidget.h
+ * Declares the StatusWidget class
+ *
  * \author Igor Siemienowicz
- * 
+ *
  * \copyright GPL 3.0
  */
 
-// #define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
-#include <catch/catch.hpp>
-#include <gui/deskapi/server.h>
+#include <QDebug>
+#include <QWidget>
+
+#include "../deskapi/status.h"
+
+#ifndef _td_gui_deskgui_statuswidget_h_included
+#define _td_gui_deskgui_statuswidget_h_included
+
+namespace TootDesk { namespace Gui {
 
 /**
- * \brief Entry point to the CATCH-based test executable
- * 
- * \param argc The number of command-line arguments
- * 
- * \param argv The vector of command-line arguments
- * 
- * \return Non-zero on failure
+ * \brief A widget for displaying a Status item
  */
-int main( int argc, char* argv[] )
+class StatusWidget : public QWidget
 {
-    // Register Qt metatypes
-    qRegisterMetaType<TootDesk::Api::ServerPtr>();
 
-    // Run our tests
-    return Catch::Session().run( argc, argv );
-}   // end main function
+    Q_OBJECT
 
+    // --- External Interface ---
+
+    public:
+
+    explicit StatusWidget(
+        const Api::Status& status,
+        QWidget* parent = nullptr);
+
+    // --- Internal Declarations ---
+
+    protected:
+
+};  // end StatusWidget class
+
+}}  // end TootDesk::Gui namespace
+
+#endif
