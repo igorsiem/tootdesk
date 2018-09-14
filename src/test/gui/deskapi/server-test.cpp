@@ -142,8 +142,7 @@ TEST_CASE("TootDesk::Api::Server serialisation", "[unit][tdapi]")
 
 }   // end Server serialisation test
 
-TEST_CASE("TootDesk::Api::Server online operations",
-        "[unit]tdapi][online][current]")
+TEST_CASE("TootDesk::Api::Server online operations", "[unit]tdapi][online]")
 {
     TdApi::Server server("http://mastodon.social");
 

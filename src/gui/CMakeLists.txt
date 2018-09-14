@@ -26,6 +26,7 @@ add_executable(tootdesk-gui ${GUI_SRC} ${UI_HEADERS})
 
 target_link_libraries(tootdesk-gui
     Qt5::Widgets
+    Qt5::WebEngineWidgets
     mastodon-cpp
     curlpp
     ${CURL_LIB}

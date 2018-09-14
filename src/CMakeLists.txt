@@ -29,11 +29,17 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 # Tell Cmake where to find Qt stuff
-set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)
+# set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake/Qt5Widgets)
+set(CMAKE_PREFIX_PATH $ENV{QT_DIR}/lib/cmake)
 message("CMAKE_PREFIX_PATH set to '${CMAKE_PREFIX_PATH}'")
 
 # Find QtWidgets
-find_package(Qt5Widgets)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
+
+include_directories(
+    ${Qt5WebEngineWidgets_INCLUDE_DIRS}
+)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

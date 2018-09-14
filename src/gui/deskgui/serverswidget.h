@@ -87,6 +87,8 @@ class ServersWidget : public QWidget
         return serverAtIndex(selRow);
     }   // end selectedServer method
 
+    // -- Outgoing Event Signals --
+
     signals:
 
     /**
@@ -111,6 +113,10 @@ class ServersWidget : public QWidget
     void serverSelected(Api::ServerPtr server);
 
     // --- Internal Declarations ---
+
+    // -- Event Handlers --
+
+    // - Event Slots -
 
     protected slots:
 
@@ -143,7 +149,7 @@ class ServersWidget : public QWidget
 
     protected:
 
-    // -- Event-handler Overrides --
+    // - Event-handler Overrides from Base Class -
 
     /**
      * \brief Set table column widths when the widget is resized
@@ -170,6 +176,45 @@ class ServersWidget : public QWidget
 
         QWidget::resizeEvent(e);
     }   // end resizeEvent method
+
+    // - Action Implementations -
+
+    /**
+     * \brief Allow the User to create a new Server
+     * 
+     * This is a handler method for the "New Server" button. It displays the
+     * `ServerDialog`, and then adds a new `Server` object with the data
+     * entered by the User.
+     * 
+     * This method catches all exceptions, and displays error messages to the
+     * User.
+     */
+    void createNewServer(void);
+
+    /**
+     * \brief Allow the User the edit an existing Server's details
+     * 
+     * This is the handler method for the "Edit Server" button. It displays
+     * the `ServerDialog`, and sets the updated details in the `Server`
+     * object. Note that the `Server` is actually removed from -- and then
+     * reinsterted into -- the collection of servers, to ensure that the
+     * sorting remains valid.
+     * 
+     * This method catches all exceptions, and displays error messages to the
+     * User.
+     * 
+     * \todo Ensure that related account details are updated / invalidated /
+     * re-validated if the Server URL is changed
+     */
+    void editExistingServer(void);
+
+    /**
+     * \brief Allow the User to delete a `Server` object (with confirmation)
+     * 
+     * This method catches all exceptions, and displays error messages to the
+     * User.
+     */
+    void deleteServer(void);
 
     // -- UI Setup Functions --
 

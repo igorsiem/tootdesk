@@ -146,6 +146,19 @@ void MainWindow::setupCentralWidget(void)
             else qDebug() << "no server selected";
         });
 
+///    // TODO remove temp / demo code
+///    auto authButton = new QPushButton("Auth", rightFrame);
+///    rightFrame->layout()->addWidget(authButton);
+
+///    connect(
+///        authButton,
+///        &QPushButton::clicked,
+///        [this](bool)
+///        {
+///            TdGui::AuthDialog authDlg("http://qprise.com");
+///            authDlg.exec();
+///        });
+
     mainSplitter->addWidget(rightFrame);
 
     // Set up the geometry of the main splitter - getting it from persistent

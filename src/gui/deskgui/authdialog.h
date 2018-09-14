@@ -15,29 +15,45 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file deskgui.h
- * Include all DeskGui declarations
+ * \file authdialog.h
+ * Declares the `AuthDialog` class
  *
  * \author Igor Siemienowicz
  *
  * \copyright GPL 3.0
  */
 
-#include "authdialog.h"
-#include "errorhandling.h"
-#include "servertablemodel.h"
-#include "serverswidget.h"
-#include "statuslistwidget.h"
+#include <QDialog>
 
-#ifndef _td_gui_deskgui_h_included
-#define _td_gui_deskgui_h_included
+#ifndef _td_gui_deskgui_authdialog_h_included
+#define _td_gui_deskgui_authdialog_h_included
 
-namespace TootDesk {
+namespace TootDesk { namespace Gui {
 
 /**
- * \brief Namespace for TootDesk GUI-related declarations
+ * \brief Dialog for executing the OAuth process, allowing the User to access
+ * a Server to enter their credentials and retrieve an access token
+ * 
+ * \todo Expand documentation about this class
  */
-namespace Gui {
+class AuthDialog : public QDialog
+{
+
+    // --- External Interface ---
+
+    public:
+
+    explicit AuthDialog(QString url, QWidget* parent = nullptr);
+
+    virtual ~AuthDialog(void) = default;
+
+    // --- Internal Declarations ---
+
+    protected:
+
+
+
+};  // end AuthDialog class
 
 }}  // end TootDesk::Gui namespace
 

@@ -29,7 +29,7 @@
 
 namespace TdApi = TootDesk::Api;
 
-TEST_CASE("Status and Account", "[unit][tdapi][online][current]")
+TEST_CASE("Status and Account", "[unit][tdapi][online]")
 {
 
     // Get the public timeline of mastodon.social, and take its first

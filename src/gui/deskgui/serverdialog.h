@@ -35,6 +35,9 @@
 
 namespace TootDesk { namespace Gui {
 
+/**
+ * \brief Simple dialog for entering or updating a Server's details
+ */
 class ServerDialog : public QDialog
 {
 

@@ -15,30 +15,43 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file deskgui.h
- * Include all DeskGui declarations
+ * \file authdialog.cpp
+ * Implements the `AuthDialog` class
  *
  * \author Igor Siemienowicz
  *
  * \copyright GPL 3.0
  */
 
+#include <QWebEngineView>
+#include <QVBoxLayout>
+
 #include "authdialog.h"
-#include "errorhandling.h"
-#include "servertablemodel.h"
-#include "serverswidget.h"
-#include "statuslistwidget.h"
 
-#ifndef _td_gui_deskgui_h_included
-#define _td_gui_deskgui_h_included
+namespace TootDesk { namespace Gui {
 
-namespace TootDesk {
+AuthDialog::AuthDialog(QString url, QWidget* parent) :
+    QDialog(parent)
+{
 
-/**
- * \brief Namespace for TootDesk GUI-related declarations
- */
-namespace Gui {
+    setFixedSize(640, 480);
+    setLayout(new QVBoxLayout(this));
+    auto webEngineView = new QWebEngineView(this);
+    layout()->addWidget(webEngineView);
+
+    connect(
+        webEngineView
+        , &QWebEngineView::loadFinished
+        , [this, webEngineView](bool)
+        {
+            webEngineView->page()->toHtml([this](const QString& html)
+            {
+                qDebug() << html;
+            });
+        });
+
+    webEngineView->load(QUrl(url));
+
+}   // end constructor
 
 }}  // end TootDesk::Gui namespace
-
-#endif

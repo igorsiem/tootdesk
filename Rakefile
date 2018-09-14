@@ -186,7 +186,7 @@ namespace :test do
     end
 
     task :current => :bin do
-        cmd_line = test_dir + "/" + test_exe_file_name + " [current]"
+        cmd_line = test_dir + "/" + test_exe_file_name + " [current] -d yes"
 
         sh cmd_line
     end
@@ -215,7 +215,7 @@ task :test => "test:all"
 
 # --- Run ---
 
-desc "run the GUI executabe"
+desc "run the GUI executable"
 task :run => :bin do
     exe_dir = "build/gui"
     exe_name = "tootdesk-gui"
