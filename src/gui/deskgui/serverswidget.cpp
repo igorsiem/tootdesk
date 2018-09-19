@@ -31,6 +31,8 @@
 #include <QVBoxLayout>
 
 #include "../deskapi/lambdarunnable.h"
+
+#include "authdialog.h"
 #include "errorhandling.h"
 #include "serverdialog.h"
 #include "serverswidget.h"
@@ -98,13 +100,15 @@ ServersWidget::ServersWidget(
     toolBar->addAction(
         tr("Delete Server"), [this](void) { deleteServer(); });
 
+    toolBar->addAction(
+        tr("Add Account"), [this](void) { addNewAcount(); });
+
     // Action when selection is changed - emit the `serverSelected` signal
     connect(
         m_serverTableView->selectionModel(),
         &QItemSelectionModel::currentRowChanged,
         [this](const QModelIndex& current, const QModelIndex& previous)
         {
-
             // If there is some other retrieval in progress, ignore it for
             // now (info will be retained for later use by the server
             // object) 
@@ -342,6 +346,18 @@ void ServersWidget::deleteServer(void)
     TD_ACTION_CATCH_ALL_FROM(tr("Delete Server"))
 
 }   // end deleteServer method
+
+void ServersWidget::addNewAcount(void)
+{
+    TD_ACTION_TRY
+    {
+        Gui::AuthDialog authDlg("http://qprise.com", this);
+        authDlg.exec();
+
+        TD_RAISE_API_ERROR(tr("This function has not been implemented yet"));
+    }
+    TD_ACTION_CATCH_ALL_FROM(tr("Add Account"))
+}   // end addNewAcount
 
 void ServersWidget::setupInstanceInfoWidget(void)
 {

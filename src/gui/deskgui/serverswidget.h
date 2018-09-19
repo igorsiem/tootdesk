@@ -216,6 +216,12 @@ class ServersWidget : public QWidget
      */
     void deleteServer(void);
 
+    /**
+     * \brief Allow the User to associate a User Account with a given
+     * Server
+     */
+    void addNewAcount(void);
+
     // -- UI Setup Functions --
 
     /**

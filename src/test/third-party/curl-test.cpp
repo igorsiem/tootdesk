@@ -26,6 +26,7 @@
 #include <catch/catch.hpp>
 #include <curl/curl.h>
 
+// Basic verification of cUrl integration
 TEST_CASE("curl","[third-party]")
 {
     REQUIRE(curl_global_init(CURL_GLOBAL_ALL) == 0);

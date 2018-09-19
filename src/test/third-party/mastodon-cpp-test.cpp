@@ -33,7 +33,7 @@ using Mastodon::Easy;
 
 // This is a really basic test to verify that Mastodon-CPP can go online and
 // get some statuses and other info.
-TEST_CASE("mastodon-cpp basic", "[third-party][online][current]")
+TEST_CASE("mastodon-cpp basic", "[third-party][online]")
 {
 
 ///    std::string serverAddress("mastodon.social");
@@ -51,9 +51,9 @@ TEST_CASE("mastodon-cpp basic", "[third-party][online][current]")
         , response);
 
     REQUIRE(result == 0);
-    std::cout
-        << std::endl << "[DEBUG] verify: " << response
-        << std::endl;
+    // std::cout
+    //     << std::endl << "[DEBUG] verify: " << response
+    //     << std::endl;
 
     // Check instance info
 ///    REQUIRE_NOTHROW(masto.get(Mastodon::API::v1::instance, response));

@@ -34,4 +34,5 @@ target_link_libraries(test-tootdesk
     jsoncpp
     mastodon-cpp
     curlpp
+    cryptopp
 )

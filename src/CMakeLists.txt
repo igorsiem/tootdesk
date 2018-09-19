@@ -52,6 +52,8 @@ if (WIN32)
     set(CURLPP_LIB "$ENV{CURLPP_LIBRARY}")
 endif()
 
+# TODO Find CryptoPP - works automatically under Ubuntu
+
 include_directories(
     .
     third-party
